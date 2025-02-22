@@ -1,29 +1,41 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence, type PanInfo } from "framer-motion";
-import { Heart } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { TypographyH3 } from "./typography/H3";
+import Image from "next/image";
+import prisma from "@/lib/prisma";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
-import type { Fit, Swipe } from "@prisma/client";
-import Image from "next/image";
-import { swiped } from "@/actions/swipe";
+import { Heart } from "lucide-react";
 import { DockDemo } from "./emoji-dock";
-import { useSession } from "@/lib/auth-client";
+import { swiped } from "@/actions/swipe";
+import { useState, useEffect } from "react";
+import { TypographyH3 } from "./typography/H3";
+import type { Fit, Prisma, Swipe } from "@prisma/client";
+import { Card, CardContent } from "@/components/ui/card";
+import { motion, AnimatePresence, type PanInfo } from "framer-motion";
 
 interface SwipeCardsProps {
-  props: (Fit & {
-    swipes: Swipe[];
-    _count: {
-      swipes: number;
+  props: Prisma.FitGetPayload<{
+    include: {
+      swipes: {
+        where: {
+          swipeType: "Like";
+        };
+      };
+      user: true;
+      _count: {
+        select: {
+          swipes: {
+            where: {
+              swipeType: "Like";
+            };
+          };
+        };
+      };
     };
-  })[];
+  }>[];
 }
 
 export default function SwipeCards({ props }: SwipeCardsProps) {
-  const session = useSession();
   const [currentProfile, setCurrentProfile] = useState(0);
   const [direction, setDirection] = useState<string | null>(null);
   const [likes, setLikes] = useState(props.map((fit) => fit._count.swipes));
@@ -104,16 +116,18 @@ export default function SwipeCards({ props }: SwipeCardsProps) {
                     <div className="absolute bottom-0 left-0 right-0 p-6 text-foreground">
                       <div className="flex items-center justify-between mb-4">
                         <div>
-                          <TypographyH3>{session.data?.user.name}</TypographyH3>
+                          <TypographyH3>
+                            {props[currentProfile].user.name}
+                          </TypographyH3>
                           <p className="text-base text-gray-200">
                             {props[currentProfile].description}
                           </p>
                         </div>
                         <div className="flex flex-col items-center gap-1">
                           <Button
-                            onClick={handleLike}
-                            variant="secondary"
                             size="icon"
+                            variant="secondary"
+                            onClick={handleLike}
                             className="bg-primary/75 hover:bg-foreground/30 text-foreground rounded-full p-3"
                           >
                             <Heart className="w-8 h-8" />

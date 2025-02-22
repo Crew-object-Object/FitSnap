@@ -1,7 +1,7 @@
-import SwipeCards from "@/components/image-swipe";
 import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { headers } from "next/headers";
+import SwipeCards from "@/components/image-swipe";
 
 export default async function DashboardPage() {
   const user = await auth.api.getSession({
@@ -14,7 +14,7 @@ export default async function DashboardPage() {
         not: user?.user.id,
       },
       swipes: {
-        every: {
+        none: {
           userId: user?.user.id,
         },
       },
@@ -25,6 +25,7 @@ export default async function DashboardPage() {
           swipeType: "Like",
         },
       },
+      user: true,
       _count: {
         select: {
           swipes: {
