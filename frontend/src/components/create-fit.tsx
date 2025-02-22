@@ -55,13 +55,13 @@ export function CreateFit() {
                   width={200}
                   height={200}
                 />
-                <button
+                <Button
                   type="button"
                   onClick={() => setImageUrl(null)}
                   className="absolute top-2 right-2 bg-red-500 text-foreground p-1 rounded-full hover:bg-red-600"
                 >
                   <X className="w-5 h-5" />
-                </button>
+                </Button>
               </div>
             ) : (
               <UploadDropzone
