@@ -29,7 +29,7 @@ export function CreateFit() {
   const [tags, setTags] = useState<string[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [uploadStatus, setUploadStatus] = useState<string | null>(null);
+  const [, setUploadStatus] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
