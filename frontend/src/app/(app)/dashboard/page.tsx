@@ -8,13 +8,36 @@ export default async function DashboardPage() {
     headers: await headers(),
   });
 
-  const data = await prisma.fit.findMany({
+  let data = await prisma.fit.findMany({
     where: {
       userId: {
-        not: user?.user.id,
+        not: user?.session.id,
+      },
+    },
+    include: {
+      swipes: {
+        where: {
+          swipeType: "Like",
+        },
+      },
+      _count: {
+        select: {
+          swipes: {
+            where: {
+              swipeType: "Like",
+            },
+          },
+        },
+      },
+    },
+    orderBy: {
+      swipes: {
+        _count: "desc",
       },
     },
   });
+
+  data = data.sort((a, b) => b._count.swipes - a._count.swipes);
 
   return (
     <div className="w-full h-full">

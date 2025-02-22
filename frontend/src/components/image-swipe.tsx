@@ -32,8 +32,7 @@ export default function SwipeCards({ props }: SwipeCardsProps) {
     formData.append("direction", direction);
     formData.append("fitData", JSON.stringify(fitData));
 
-    const response = await swiped(formData);
-    console.log(response);
+    await swiped(formData);
   }
 
   const handleDragEnd = (
@@ -96,7 +95,7 @@ export default function SwipeCards({ props }: SwipeCardsProps) {
                     <div className="absolute bottom-0 left-0 right-0 p-6 text-foreground">
                       <div className="flex items-center justify-between mb-4">
                         <div>
-                          <TypographyH3>Fit #{currentProfile + 1}</TypographyH3>
+                          <TypographyH3>{}</TypographyH3>
                           <p className="text-base text-gray-200">
                             {props[currentProfile].description}
                           </p>
@@ -112,7 +111,10 @@ export default function SwipeCards({ props }: SwipeCardsProps) {
                       </div>
                       <div className="flex flex-wrap gap-2 mt-4">
                         {props[currentProfile].tags.map((tag, index) => (
-                          <Badge key={index} className="text-sm px-3 py-1 bg-foreground/20">
+                          <Badge
+                            key={index}
+                            className="text-sm px-3 py-1 bg-foreground/20"
+                          >
                             {tag}
                           </Badge>
                         ))}
