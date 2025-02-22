@@ -3,12 +3,14 @@ from fastapi import APIRouter, UploadFile, File
 import cv2
 import numpy as np
 from joblib import load
+from fastapi import Form
 import pandas as pd
 from pathlib import Path
 import mediapipe as mp
 from mediapipe.tasks.python import vision
 from PIL import Image
 from process import load_seg_model, get_palette, generate_mask
+import requests
 
 def process_image(image_path, output_path, overlay_path):
     device = 'cpu'
@@ -65,9 +67,11 @@ def segment_body_mediapipe(image):
     return (mask.astype(np.uint8) * 255)
 
 @router.post("/predict-size/")
-async def predict_size(file: UploadFile = File(...)):
+async def predict_size(file: UploadFile = File(...), fit_url: str = Form(None)):
     # Read the uploaded image
     contents = await file.read()
+    with open("uploaded_image.jpg", "wb") as f:
+        f.write(contents)
     nparr = np.frombuffer(contents, np.uint8)
     image = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
@@ -93,7 +97,7 @@ async def predict_size(file: UploadFile = File(...)):
     # Get width at these points and normalize by image width
     image_width = mask.shape[1]
     chest_width = (np.sum(mask[chest_height, :]) / 255) / image_width * 300  # Increased scaling factor
-    waist_width = (np.sum(mask[waist_height, :]) / 255) / image_width * 100
+    waist_width = (np.sum(mask[waist_height, :]) / 255) / image_width * 300
     
     # Get nose landmark from mediapipe
     detector = vision.PoseLandmarker.create_from_options(options)
@@ -101,38 +105,31 @@ async def predict_size(file: UploadFile = File(...)):
     results = detector.detect(mp_image)
     
     if results.pose_landmarks[0]:
-        nose = results.pose_landmarks[0][0] # Nose is landmark 0
-        
-        # Calculate angle from nose position (assuming frontal is z=0)
-        # As person turns sideways, z value increases
-        # Max rotation considered is 90 degrees (pi/2)
         # Get world landmarks for better 3D positioning
         world_landmarks = results.pose_world_landmarks[0]
         
         # Get shoulder landmarks (landmarks 11 and 12 are left and right shoulders)
         left_shoulder = world_landmarks[11]
         right_shoulder = world_landmarks[12]
-        nose = world_landmarks[0]
         
-        # Calculate shoulder midpoint
-        shoulder_mid = type('Point', (), {
-            'x': (left_shoulder.x + right_shoulder.x) / 2,
-            'y': (left_shoulder.y + right_shoulder.y) / 2,
-            'z': (left_shoulder.z + right_shoulder.z) / 2
-        })
+        # Calculate actual 3D distance between shoulders
+        shoulder_distance_3d = np.sqrt(
+            (right_shoulder.x - left_shoulder.x)**2 +
+            (right_shoulder.y - left_shoulder.y)**2 +
+            (right_shoulder.z - left_shoulder.z)**2
+        )
         
-        # Calculate vector from shoulder midpoint to nose
-        nose_vector = type('Vector', (), {
-            'x': nose.x - shoulder_mid.x,
-            'y': nose.y - shoulder_mid.y,
-            'z': nose.z - shoulder_mid.z
-        })
+        # Calculate 2D distance (ignoring z-axis)
+        shoulder_distance_2d = np.sqrt(
+            (right_shoulder.x - left_shoulder.x)**2 +
+            (right_shoulder.y - left_shoulder.y)**2
+        )
         
-        # Calculate rotation angle in XZ plane (yaw)
-        rotation_angle = abs(np.arctan2(nose_vector.z, nose_vector.x))
-        rotation_factor = 1 / np.cos(rotation_angle)  # gives 1 for front view, more for side views
-        rotation_factor = min(rotation_factor, 2.0)  # Limit the maximum factor to 2.0
-        print(f"Rotation angle: {np.degrees(rotation_angle)}, Factor: {rotation_factor}")
+        # Calculate rotation factor (2D distance / 3D distance)
+        # When person is facing forward, this will be close to 1
+        # When turned sideways, this will be smaller
+        rotation_factor = min(2.0, 1 / (shoulder_distance_2d / shoulder_distance_3d))
+        print(rotation_factor)
         
         # Apply rotation compensation to measurements
         chest_width *= rotation_factor
@@ -176,21 +173,94 @@ async def predict_size(file: UploadFile = File(...)):
     # Set paths for output files
     output_path = "output/segmented.png"
     overlay_path = "output/overlay.png"
-    temp_input = "output/input.png"
+    fit_path = "output/input.png"
+
+    # Ensure output directory exists
+    Path("output").mkdir(exist_ok=True)
 
     # Convert MediaPipe image to numpy array, then to PIL Image
-    image_array = mp_image.numpy_view()
+    # Download image from URL if provided
+    if fit_url:
+        response = requests.get(fit_url)
+        image_array = cv2.imdecode(np.frombuffer(response.content, np.uint8), cv2.IMREAD_COLOR)
+    else:
+        return {"error": "No fit_url provided"}
+    image_array = cv2.cvtColor(image_array, cv2.COLOR_BGR2RGB)
     pil_image = Image.fromarray(image_array)
     
     # Save temporary file
-    pil_image.save(temp_input)
+    pil_image.save(fit_path)
     
     # Process the image and save results
-    try:
-        process_image(temp_input, output_path, overlay_path)
-    except Exception as e:
-        print(f"Error processing image: {e}")
-        return {"error": "Failed to process image"}
+    process_image(fit_path, output_path, overlay_path)
+    # Get landmarks for fit image
+    fit_img = cv2.imread(fit_path, cv2.IMREAD_UNCHANGED)
+    fit_mp = mp.Image(image_format=mp.ImageFormat.SRGB, data=cv2.cvtColor(fit_img, cv2.COLOR_BGRA2RGB))
+    fit_results = detector.detect(fit_mp)
+
+    # Get original image landmarks again
+    original_results = detector.detect(mp_image)
+
+    if (fit_results.pose_landmarks and fit_results.pose_landmarks[0] and 
+        original_results.pose_landmarks and original_results.pose_landmarks[0] and 
+        len(original_results.pose_landmarks[0]) > 12 and len(fit_results.pose_landmarks[0]) > 12):
+
+        # Get shoulder landmarks from both images
+        orig_left = original_results.pose_landmarks[0][11]
+        orig_right = original_results.pose_landmarks[0][12]
+        overlay_left = fit_results.pose_landmarks[0][11]
+        overlay_right = fit_results.pose_landmarks[0][12]
+
+        # Convert normalized landmark positions into pixel coordinates
+        orig_img_h, orig_img_w = image.shape[:2]
+        orig_left_pt = np.array([orig_left.x * orig_img_w, orig_left.y * orig_img_h])
+        orig_right_pt = np.array([orig_right.x * orig_img_w, orig_right.y * orig_img_h])
+        orig_mid = (orig_left_pt + orig_right_pt) / 2
+
+        # Load the overlay (fit) image and get dimensions
+        overlay_img = cv2.imread(overlay_path, cv2.IMREAD_UNCHANGED)
+        if overlay_img is None:
+            raise ValueError("Overlay image not found at the provided path.")
+        overlay_h, overlay_w = overlay_img.shape[:2]
+        overlay_left_pt = np.array([overlay_left.x * overlay_w, overlay_left.y * overlay_h])
+        overlay_right_pt = np.array([overlay_right.x * overlay_w, overlay_right.y * overlay_h])
+        overlay_mid = (overlay_left_pt + overlay_right_pt) / 2
+
+        # Compute angles (in degrees) for shoulders
+        orig_angle = np.degrees(np.arctan2(orig_right_pt[1] - orig_left_pt[1],
+                                             orig_right_pt[0] - orig_left_pt[0]))
+        overlay_angle = np.degrees(np.arctan2(overlay_right_pt[1] - overlay_left_pt[1],
+                                              overlay_right_pt[0] - overlay_left_pt[0]))
+        angle_diff = orig_angle - overlay_angle
+
+        # Compute scaling factor based on shoulder distances
+        orig_dist = np.hypot(*(orig_right_pt - orig_left_pt))
+        overlay_dist = np.hypot(*(overlay_right_pt - overlay_left_pt))
+        scale_factor = orig_dist / overlay_dist if overlay_dist != 0 else 1.0
+
+        # Create an affine transform that rotates, scales, and translates the overlay image
+        # Use the overlay shoulder midpoint as the center of rotation
+        M = cv2.getRotationMatrix2D(tuple(overlay_mid), angle_diff, scale_factor)
+        # Adjust translation so that overlay_mid aligns with orig_mid
+        M[:, 2] += (orig_mid - overlay_mid)
+
+        # Apply the affine transformation onto a canvas the size of the original image
+        canvas = image.copy()
+        transformed_overlay = cv2.warpAffine(overlay_img, M, (orig_img_w, orig_img_h),
+                                             flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT, borderValue=(0,0,0,0))
+
+        # Composite the transformed overlay onto the original image
+        if transformed_overlay.shape[2] == 4:
+            # Separate color and alpha channels
+            overlay_rgb = transformed_overlay[:, :, :3]
+            alpha_mask = transformed_overlay[:, :, 3] / 255.0
+            alpha_mask = alpha_mask[..., np.newaxis]
+            canvas = (alpha_mask * overlay_rgb + (1 - alpha_mask) * canvas).astype(np.uint8)
+        else:
+            # If no alpha channel, simple overlay (could be modified to blend if needed)
+            canvas = transformed_overlay
+
+        cv2.imwrite("result.png", canvas)
 
     return {"shirt_size": shirt_size, "pants_size": pants_size}
 
