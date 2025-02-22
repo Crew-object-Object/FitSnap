@@ -10,8 +10,7 @@ export const auth = betterAuth({
     enabled: true,
   },
   trustedOrigins: [
-    "http://localhost:3000",
-    "https://reimagined-tribble-jxg6q95xpp9c4x-3000.app.github.dev/api/auth",
+    process.env.BETTER_AUTH_URL!
   ],
   socialProviders: {
     google: {
