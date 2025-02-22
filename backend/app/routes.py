@@ -1,3 +1,4 @@
+import io
 from fastapi import APIRouter, UploadFile, File
 import cv2
 import numpy as np
@@ -5,16 +6,49 @@ from joblib import load
 import pandas as pd
 from pathlib import Path
 import mediapipe as mp
-from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
+from PIL import Image
+from process import load_seg_model, get_palette, generate_mask
 
+def process_image(image_path, output_path, overlay_path):
+    device = 'cpu'
+    
+    # Initialize and load model
+    checkpoint_path = 'models/cloth_segm.pth'
+    net = load_seg_model(checkpoint_path, device=device)    
+    palette = get_palette(4)
+    
+    # Process the image
+    original_img = Image.open(image_path)
+    cloth_seg = generate_mask(original_img, net=net, palette=palette, device=device)
+    
+    # Save the segmentation mask
+    cloth_seg.save(output_path)
+    
+    # Convert images to numpy arrays for processing
+    original_array = np.array(original_img.convert('RGBA'))
+    mask_array = np.array(cloth_seg)
+    
+    # Create a new transparent image
+    result_array = np.zeros_like(original_array)
+    
+    # Copy original image pixels where mask is not black (0)
+    mask_bool = mask_array != 0
+    result_array[mask_bool] = original_array[mask_bool]
+    
+    # Create final image
+    final_image = Image.fromarray(result_array)
+    
+    # Save the result
+    final_image.save(overlay_path, format='PNG')
+    
 BaseOptions = mp.tasks.BaseOptions
 PoseLandmarker = mp.tasks.vision.PoseLandmarker
 PoseLandmarkerOptions = mp.tasks.vision.PoseLandmarkerOptions
 VisionRunningMode = mp.tasks.vision.RunningMode
 
 options = PoseLandmarkerOptions(
-    base_options=BaseOptions(model_asset_path="pose_landmarker_heavy.task"),
+    base_options=BaseOptions(model_asset_path="models/pose_landmarker_heavy.task"),
     running_mode=VisionRunningMode.IMAGE)
 
 router = APIRouter()
@@ -63,17 +97,42 @@ async def predict_size(file: UploadFile = File(...)):
     
     # Get nose landmark from mediapipe
     detector = vision.PoseLandmarker.create_from_options(options)
-    results = detector.detect(image)
-    print(results)
-    if results['pose_landmarks']:
-        nose = results.pose_landmarks.landmark[0]  # Nose is landmark 0
+    mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=image)
+    results = detector.detect(mp_image)
+    
+    if results.pose_landmarks[0]:
+        nose = results.pose_landmarks[0][0] # Nose is landmark 0
         
         # Calculate angle from nose position (assuming frontal is z=0)
         # As person turns sideways, z value increases
         # Max rotation considered is 90 degrees (pi/2)
-        rotation_factor = 1 / max(abs(nose.z), 0.1)  # Prevent division by zero
-        rotation_factor = min(rotation_factor, 2.0)  # Cap the adjustment factor
-        print(rotation_factor)
+        # Get world landmarks for better 3D positioning
+        world_landmarks = results.pose_world_landmarks[0]
+        
+        # Get shoulder landmarks (landmarks 11 and 12 are left and right shoulders)
+        left_shoulder = world_landmarks[11]
+        right_shoulder = world_landmarks[12]
+        nose = world_landmarks[0]
+        
+        # Calculate shoulder midpoint
+        shoulder_mid = type('Point', (), {
+            'x': (left_shoulder.x + right_shoulder.x) / 2,
+            'y': (left_shoulder.y + right_shoulder.y) / 2,
+            'z': (left_shoulder.z + right_shoulder.z) / 2
+        })
+        
+        # Calculate vector from shoulder midpoint to nose
+        nose_vector = type('Vector', (), {
+            'x': nose.x - shoulder_mid.x,
+            'y': nose.y - shoulder_mid.y,
+            'z': nose.z - shoulder_mid.z
+        })
+        
+        # Calculate rotation angle in XZ plane (yaw)
+        rotation_angle = abs(np.arctan2(nose_vector.z, nose_vector.x))
+        rotation_factor = 1 / np.cos(rotation_angle)  # gives 1 for front view, more for side views
+        rotation_factor = min(rotation_factor, 2.0)  # Limit the maximum factor to 2.0
+        print(f"Rotation angle: {np.degrees(rotation_angle)}, Factor: {rotation_factor}")
         
         # Apply rotation compensation to measurements
         chest_width *= rotation_factor
@@ -113,7 +172,26 @@ async def predict_size(file: UploadFile = File(...)):
         pants_size = "XL"
     else:
         pants_size = "XXL"
-        
+    
+    # Set paths for output files
+    output_path = "output/segmented.png"
+    overlay_path = "output/overlay.png"
+    temp_input = "output/input.png"
+
+    # Convert MediaPipe image to numpy array, then to PIL Image
+    image_array = mp_image.numpy_view()
+    pil_image = Image.fromarray(image_array)
+    
+    # Save temporary file
+    pil_image.save(temp_input)
+    
+    # Process the image and save results
+    try:
+        process_image(temp_input, output_path, overlay_path)
+    except Exception as e:
+        print(f"Error processing image: {e}")
+        return {"error": "Failed to process image"}
+
     return {"shirt_size": shirt_size, "pants_size": pants_size}
 
 @router.post("/predict-size-metrics/")
