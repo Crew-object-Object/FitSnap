@@ -7,7 +7,15 @@ const withSerwist = withSerwistInit({
 });
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  experimental: {
+    serverActions: {
+      allowedOrigins: [
+        "localhost:3000",
+        "fitsnap-hackx.vercel.app",
+        "solid-memory-qwxrp6qwrw4c6wqr-3000.app.github.dev",
+      ],
+    },
+  },
 };
 
-export default nextConfig;
+export default withSerwist(nextConfig);
