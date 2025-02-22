@@ -40,7 +40,7 @@ export function HomeButton() {
     >
       <Link className="text-xl font-semibold w-full p-2" href="/">
         <Image alt="logo" width={48} height={48} src="/favicon.png" />
-        YogaSense
+        FitSnap
       </Link>
     </Button>
   );
