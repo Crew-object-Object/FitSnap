@@ -10,12 +10,14 @@ import { Button } from "./ui/button";
 import type { Fit } from "@prisma/client";
 import Image from "next/image";
 import { swiped } from "@/actions/swipe";
+import { useSession } from "@/lib/auth-client";
 
 interface SwipeCardsProps {
   props: Fit[];
 }
 
 export default function SwipeCards({ props }: SwipeCardsProps) {
+  const session = useSession();
   const [currentProfile, setCurrentProfile] = useState(0);
   const [direction, setDirection] = useState<string | null>(null);
   const [, setLikes] = useState(props.map(() => 0));
@@ -95,7 +97,7 @@ export default function SwipeCards({ props }: SwipeCardsProps) {
                     <div className="absolute bottom-0 left-0 right-0 p-6 text-foreground">
                       <div className="flex items-center justify-between mb-4">
                         <div>
-                          <TypographyH3>{}</TypographyH3>
+                          <TypographyH3>{session.data?.user.name}</TypographyH3>
                           <p className="text-base text-gray-200">
                             {props[currentProfile].description}
                           </p>
@@ -107,6 +109,7 @@ export default function SwipeCards({ props }: SwipeCardsProps) {
                           className="bg-foreground/20 hover:bg-foreground/30 text-foreground rounded-full p-3"
                         >
                           <Heart className="w-8 h-8" />
+                          {/* {props.data[0]._count.swipes} */}
                         </Button>
                       </div>
                       <div className="flex flex-wrap gap-2 mt-4">

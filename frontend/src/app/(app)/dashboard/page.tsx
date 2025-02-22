@@ -38,7 +38,7 @@ export default async function DashboardPage() {
   });
 
   data = data.sort((a, b) => b._count.swipes - a._count.swipes);
-
+console.log(data)
   return (
     <div className="w-full h-full">
       <SwipeCards props={data} />
