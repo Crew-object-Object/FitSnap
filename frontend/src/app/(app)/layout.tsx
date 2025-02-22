@@ -1,9 +1,5 @@
-"use client";
-
 import { Toaster } from "sonner";
-import { ReactNode, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useSession } from "@/lib/auth-client";
+import { ReactNode } from "react";
 import { Separator } from "@/components/ui/separator";
 import { AppSidebar } from "@/components/app-sidebar";
 import { LinkBreadcrumbs } from "@/components/link-breadcrumbs";
@@ -11,15 +7,6 @@ import { SwEventsHandler } from "@/components/sw-events-handler";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 
 export default function AppLayout({ children }: { children: ReactNode }) {
-  // const router = useRouter();
-  // const session = useSession();
-
-  // useEffect(() => {
-  //   if (!session.data) {
-  //     router.push("/sign-in");
-  //   }
-  // }, [session.data, router]);
-
   return (
     <>
       <SidebarProvider>
