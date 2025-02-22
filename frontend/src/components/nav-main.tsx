@@ -56,6 +56,7 @@ export function SidebarNavigation() {
         { label: "Dashboard", href: "/dashboard", icon: LayoutDashboardIcon },
         { label: "Find Your Fit", href: "/find-your-fit", icon: Shirt },
         { label: "Leaderboard", href: "/leaderboard", icon: Trophy },
+        { label: "Profile", href: "/profile", icon: User2 },
       ],
     },
   ];
@@ -92,11 +93,6 @@ export function UserDropdownButtons() {
       <DropdownMenuItem asChild>
         <Link href="/settings" onClick={() => setOpenMobile(false)}>
           <CogIcon /> Settings
-        </Link>
-      </DropdownMenuItem>
-      <DropdownMenuItem asChild>
-        <Link href="/profile" onClick={() => setOpenMobile(false)}>
-          <User2 /> Profile
         </Link>
       </DropdownMenuItem>
       <DropdownMenuItem

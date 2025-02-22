@@ -1,17 +1,22 @@
 "use client";
 
 import Image from "next/image";
+import { useEffect, useState } from "react";
+import prisma from "@/lib/prisma";
 import { Card } from "@/components/ui/card";
 import { ChevronRight } from "lucide-react";
+import { useSession } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 
 export function ProfileContent() {
+  const session = useSession();
+  const [rank, setRank] = useState<number>(0);
+
   return (
     <div className="container mx-auto px-4 pt-20">
-      {/* Rank Bar */}
       <div className="max-w-md mx-auto mb-12">
         <div className="bg-teal-400 text-white text-center py-3 rounded-lg text-lg font-medium">
-          Rank
+          {`Rank: ${rank}`}
         </div>
       </div>
 

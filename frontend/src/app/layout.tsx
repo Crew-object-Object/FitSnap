@@ -6,8 +6,9 @@ import { Toaster } from "react-hot-toast";
 import { ThemeProvider } from "next-themes";
 
 export const metadata: Metadata = {
-  title: "Create Next App",
-  description: "Created by create-next-app",
+  title: "FitSnap | AI Size Predictor",
+  description:
+    "An AI-powered solution that predicts a user's shoulder width, chest, and waist measurements based on height and recommends the best clothing size for t-shirts, shirts, and pants.",
 };
 
 const inter = Inter({
