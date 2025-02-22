@@ -39,18 +39,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <SidebarProvider>
-            <AppSidebar />
-            <main className="p-4 flex flex-col gap-4 w-full max-w-xl mx-auto">
-              <div className="flex items-center h-6 gap-2">
-                <SidebarTrigger />
-                <Separator orientation="vertical" className="h-full mr-2" />
-                <LinkBreadcrumbs />
-              </div>
-              {children}
-            </main>
-          </SidebarProvider>
-          <Toaster />
+          {children}
         </ThemeProvider>
       </body>
     </html>
