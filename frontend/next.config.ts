@@ -1,6 +1,5 @@
 import type { NextConfig } from "next";
 import withSerwistInit from "@serwist/next";
-import { url } from "inspector";
 
 const withSerwist = withSerwistInit({
   swSrc: "src/app/sw.ts",
