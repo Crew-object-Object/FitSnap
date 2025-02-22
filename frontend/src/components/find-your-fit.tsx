@@ -14,6 +14,8 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
+import { DetectionAction } from "@/actions/detection";
+import prisma from "@/lib/prisma";
 
 export default function FindYourFit({ id }: { id?: string }) {
   const [step, setStep] = useState("input");
@@ -26,12 +28,35 @@ export default function FindYourFit({ id }: { id?: string }) {
   const [result, setResult] = useState<{ image?: string; size?: string }>(
     id ? { image: "/placeholder.svg?height=300&width=300", size: "M" } : {}
   );
+  const [file, setFile] = useState<File | null>(null);
 
+  async function DetectionActionCall(
+    height: string,
+    age: string,
+    weight: string
+  ) {
+    const fitData = await prisma.fit.findFirst({
+      where: {
+        id: id,
+      },
+    });
+
+    const fileUrl = fitData?.image;
+    const formData = new FormData();
+    formData.append("height", height);
+    formData.append("age", age);
+    formData.append("weight", weight);
+    formData.append("imageUrl", fileUrl!);
+    formData.append("file", JSON.stringify(file));
+
+    console.log(file);
+    const response = await DetectionAction(formData);
+  }
   const handleProceed = async () => {
     setStep("loading");
-    await new Promise((resolve) => setTimeout(resolve, 2000));
     setResult({ image: "/placeholder.svg?height=300&width=300", size: "M" });
     setStep("result");
+    await DetectionActionCall(height, age, weight);
   };
 
   const isFormValid = height && weight && age;
@@ -88,6 +113,14 @@ export default function FindYourFit({ id }: { id?: string }) {
                   id="age"
                   value={age}
                   onChange={(e) => setAge(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="file">Upload File</Label>
+                <Input
+                  id="file"
+                  type="file"
+                  onChange={(e) => setFile(e.target.files?.[0] || null)}
                 />
               </div>
               <Button
