@@ -109,17 +109,27 @@ export function CreateFit() {
                 </Button>
               </div>
             ) : (
-              <UploadDropzone<OurFileRouter, "imageUploader">
-                endpoint="imageUploader"
-                appearance={{ button: "!bg-[#AB01FE]" }}
-                onClientUploadComplete={(res) => {
-                  setImageUrl(res[0].url);
-                  console.log("Uploaded Image URL:", res[0].url);
-                }}
-                onUploadError={(error: Error) => {
-                  alert(`ERROR! ${error.message}`);
-                }}
-              />
+              <>
+                <div {...getRootProps()}>
+                  <input {...getInputProps()} />
+                  <Button>Select file</Button>
+                </div>
+
+                {file && (
+                  <div>
+                    <div>
+                      <span>{file.name}</span>
+                    </div>
+
+                    <Button
+                      onClick={handleUploadFile}
+                      disabled={!file || loading}
+                    >
+                      {loading ? "Uploading..." : "Upload"}
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
           </div>
           <div className="space-y-2">
