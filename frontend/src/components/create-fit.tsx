@@ -148,7 +148,7 @@ export function CreateFit() {
         </CardContent>
         <CardFooter>
           <Button type="submit" className="w-full">
-            Post Fit
+            Create Fit
           </Button>
         </CardFooter>
       </form>
