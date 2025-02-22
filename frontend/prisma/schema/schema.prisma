@@ -19,6 +19,8 @@ model User {
   sessions      Session[]
   accounts      Account[]
 
+  fits          Fit[]
+
   @@unique([email])
   @@map("user")
 }
@@ -66,4 +68,15 @@ model Verification {
   updatedAt  DateTime?
 
   @@map("verification")
+}
+
+model Fit {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  image       String
+  tags        String[]
+  description String
+
+  @@map("fit")
 }
