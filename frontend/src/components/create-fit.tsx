@@ -7,21 +7,29 @@ import {
   CardFooter,
   CardContent,
 } from "@/components/ui/card";
+import {
+  generatePermittedFileTypes,
+  generateClientDropzoneAccept,
+} from "uploadthing/client";
 import type React from "react";
-import { useState } from "react";
+import Image from "next/image";
 import { X } from "lucide-react";
+import { toast } from "react-hot-toast";
 import { Tags } from "@/components/tags";
+import { createFit } from "@/actions/fit";
+import { useCallback, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { useDropzone } from "@uploadthing/react";
 import { Textarea } from "@/components/ui/textarea";
-import { UploadDropzone } from "@uploadthing/react";
-import { createFit } from "@/actions/fit";
-import Image from "next/image";
-import { toast } from "sonner";
+import { useUploadThing } from "@/utils/uploadthing";
 
 export function CreateFit() {
+  const [loading, setLoading] = useState(false);
   const [tags, setTags] = useState<string[]>([]);
+  const [file, setFile] = useState<File | null>(null);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [uploadStatus, setUploadStatus] = useState<string | null>(null);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -37,6 +45,43 @@ export function CreateFit() {
     });
   };
 
+  const { startUpload, routeConfig } = useUploadThing("imageUploader", {
+    onClientUploadComplete: (res) => {
+      const fileUrl = res[0].appUrl;
+      setImageUrl(fileUrl);
+      toast.success("Image Uploaded Successfully");
+    },
+    onUploadError: () => {
+      setUploadStatus("Upload failed");
+      setLoading(false);
+      toast.success("Failed To Upload Image");
+    },
+    onUploadBegin: () => {
+      console.log("Upload has begun for", file?.name);
+      setLoading(true);
+      setUploadStatus(null);
+    },
+  });
+
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    setFile(acceptedFiles[0] || null);
+    setUploadStatus(null);
+  }, []);
+
+  const { getRootProps, getInputProps } = useDropzone({
+    onDrop,
+    accept: generateClientDropzoneAccept(
+      generatePermittedFileTypes(routeConfig).fileTypes
+    ),
+    multiple: false,
+  });
+
+  const handleUploadFile = useCallback(() => {
+    if (file) {
+      startUpload([file]);
+    }
+  }, [file, startUpload]);
+
   return (
     <Card className="max-w-2xl mx-auto">
       <form onSubmit={handleSubmit}>
@@ -49,11 +94,11 @@ export function CreateFit() {
             {imageUrl ? (
               <div className="relative w-full flex justify-center">
                 <Image
+                  width={200}
+                  height={200}
                   src={imageUrl}
                   alt="Uploaded Preview"
                   className="w-full h-64 object-cover rounded-lg border border-gray-300"
-                  width={200}
-                  height={200}
                 />
                 <button
                   type="button"
@@ -64,7 +109,7 @@ export function CreateFit() {
                 </button>
               </div>
             ) : (
-              <UploadDropzone
+              <UploadDropzone<OurFileRouter, "imageUploader">
                 endpoint="imageUploader"
                 appearance={{ button: "!bg-[#AB01FE]" }}
                 onClientUploadComplete={(res) => {
