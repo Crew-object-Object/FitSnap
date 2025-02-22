@@ -85,7 +85,7 @@ export default function SwipeCards({ props }: SwipeCardsProps) {
   };
 
   return (
-    <div className="flex flex-col items-center justify-start min-h-screen overflow-hidden touch-none">
+    <div className="flex flex-col items-center justify-start min-h-screen overflow-hidden touch-none py-8">
       <div className="w-full max-w-sm mt-4">
         <AnimatePresence>
           {currentProfile < props.length && (
