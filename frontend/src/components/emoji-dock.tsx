@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 const emojis = ["😂", "🙂", "🥰", "🤩", "🤐", "🔥"];
 
-export function DockDemo() {
+export function DockDemo({ id }: { id: string }) {
+  const router = useRouter();
   const [bursts, setBursts] = useState<
     { id: number; emoji: string; x: number }[]
   >([]);
@@ -18,6 +20,7 @@ export function DockDemo() {
     };
     setBursts((prev) => [...prev, newBurst]);
 
+    router.push(`/find-your-fit/${id}`);
     setTimeout(() => {
       setBursts((prev) => prev.filter((b) => b.id !== newBurst.id));
     }, 1000);

@@ -41,6 +41,7 @@ export default function SwipeCards({ props }: SwipeCardsProps) {
   const [currentProfile, setCurrentProfile] = useState(0);
   const [direction, setDirection] = useState<string | null>(null);
   const [likes, setLikes] = useState(props.map((fit) => fit._count.swipes));
+  const [fitId, setFitId] = useState<string>("");
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -69,6 +70,7 @@ export default function SwipeCards({ props }: SwipeCardsProps) {
       const newDirection = info.offset.x > 0 ? "right" : "left";
       setDirection(newDirection);
       Swipe(newDirection, props[currentProfile]);
+
       setTimeout(() => {
         setCurrentProfile((prev) => (prev + 1) % props.length);
         setDirection(null);
@@ -161,7 +163,7 @@ export default function SwipeCards({ props }: SwipeCardsProps) {
         </AnimatePresence>
       </div>
       <div className="mt-auto w-full flex justify-center pb-6">
-        <DockDemo />
+        <DockDemo id={props[currentProfile].id} />
       </div>
     </div>
   );
