@@ -1,12 +1,13 @@
 {
-  "name": "hackx",
-  "version": "0.1.0",
   "private": true,
+  "name": "fitsnap",
+  "version": "1.0.0",
   "scripts": {
-    "dev": "next dev --turbopack",
+    "lint": "next lint",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "dev": "next dev --turbopack",
+    "postinstall": "npx prisma generate"
   },
   "dependencies": {
     "@hookform/resolvers": "^4.1.0",
@@ -39,6 +40,7 @@
     "@radix-ui/react-tooltip": "^1.1.8",
     "@radix-ui/react-visually-hidden": "^1.1.2",
     "@serwist/next": "^9.0.11",
+    "@uploadthing/react": "^7.3.0",
     "better-auth": "^1.1.19",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -60,8 +62,10 @@
     "sonner": "^2.0.1",
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7",
+    "uploadthing": "^7.5.2",
     "vaul": "^1.1.2",
-    "zod": "^3.24.2"
+    "zod": "^3.24.2",
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

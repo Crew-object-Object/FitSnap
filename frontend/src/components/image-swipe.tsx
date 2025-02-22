@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence, type PanInfo } from "framer-motion";
 import { Heart, X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { TypographyH3 } from "./typography/H3";
 import { TypographyP } from "./typography/P";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -112,24 +111,22 @@ export default function SwipeCards() {
                     className="h-full w-full object-cover"
                   />
                   <div className="p-2 bg-primary flex justify-between items-center">
-                    <div className="flex-col items-center justify-centerli">
-                      <div className="flex items-center gap-4">
-                        <Avatar className="w-12 h-12">
-                          <AvatarImage src="https://github.com/shadcn.png" />
-                          <AvatarFallback>CN</AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <TypographyH3>
-                            {profiles[currentProfile].name}
-                          </TypographyH3>
-                        </div>
+                    <div className="flex items-center gap-4">
+                      <Avatar className="w-12 h-12">
+                        <AvatarImage src="https://github.com/shadcn.png" />
+                        <AvatarFallback>CN</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <TypographyH3>
+                          {profiles[currentProfile].name}
+                        </TypographyH3>
+                        <TypographyP>
+                          {profiles[currentProfile].age} years old
+                        </TypographyP>
                       </div>
-                      <TypographyP>
-                        {profiles[currentProfile].age} years old
-                      </TypographyP>
                     </div>
                     <div className="flex flex-col items-center">
-                      <button onClick={handleLike}>
+                      <button onClick={handleLike} className="text-red-500">
                         <Heart className="w-8 h-8" />
                       </button>
                       <TypographyP>{likes[currentProfile]} Likes</TypographyP>
@@ -139,7 +136,7 @@ export default function SwipeCards() {
                     {profiles[currentProfile].tags.map((tag, index) => (
                       <Badge
                         key={index}
-                        variant="outline"
+                        variant="secondary"
                         className="rounded-full px-3 py-1"
                       >
                         {tag}
