@@ -9,6 +9,22 @@ const withSerwist = withSerwistInit({
 const nextConfig: NextConfig = {
   images: {
     domains: ["h6q45r0c51.ufs.sh"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "utfs.io",
+        port: "",
+        pathname: "/f/**",
+        search: "",
+      },
+      {
+        protocol: "https",
+        hostname: "h6q45r0c51.ufs.sh",
+        port: "",
+        pathname: "",
+        search: "",
+      },
+    ],
   },
   experimental: {
     serverActions: {

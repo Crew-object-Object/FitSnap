@@ -14,9 +14,10 @@ import { Tags } from "@/components/tags";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { UploadDropzone } from "@/utils/uploadthing";
-import toast from "react-hot-toast";
+import { UploadDropzone } from "@uploadthing/react";
 import { createFit } from "@/actions/fit";
+import Image from "next/image";
+import { toast } from "sonner";
 
 export function CreateFit() {
   const [tags, setTags] = useState<string[]>([]);
@@ -47,15 +48,17 @@ export function CreateFit() {
             <Label htmlFor="image">Upload Image</Label>
             {imageUrl ? (
               <div className="relative w-full flex justify-center">
-                <img
+                <Image
                   src={imageUrl}
                   alt="Uploaded Preview"
                   className="w-full h-64 object-cover rounded-lg border border-gray-300"
+                  width={200}
+                  height={200}
                 />
                 <button
                   type="button"
                   onClick={() => setImageUrl(null)}
-                  className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600"
+                  className="absolute top-2 right-2 bg-red-500 text-foreground p-1 rounded-full hover:bg-red-600"
                 >
                   <X className="w-5 h-5" />
                 </button>
