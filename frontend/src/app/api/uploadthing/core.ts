@@ -28,11 +28,11 @@ export const ourFileRouter = {
     })
     .onUploadComplete(async ({ file }) => {
       try {
-        if (!file.url) {
+        if (!file.ufsUrl) {
           throw new UploadThingError("Upload failed: No file URL returned.");
         }
 
-        return { image: file.url };
+        return { image: file.ufsUrl };
       } catch (error) {
         console.error("UploadThing Upload Error:", error);
         throw new UploadThingError("Upload processing failed.");
