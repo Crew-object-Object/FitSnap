@@ -11,6 +11,9 @@ from mediapipe.tasks.python import vision
 from PIL import Image
 from process import load_seg_model, get_palette, generate_mask
 import requests
+import uuid
+from fastapi.responses import FileResponse
+from fastapi import HTTPException
 
 def process_image(image_path, output_path, overlay_path):
     device = 'cpu'
@@ -260,9 +263,49 @@ async def predict_size(file: UploadFile = File(...), fit_url: str = Form(None)):
             # If no alpha channel, simple overlay (could be modified to blend if needed)
             canvas = transformed_overlay
 
-        cv2.imwrite("result.png", canvas)
+        # Generate unique ID for the file
+        unique_id = str(uuid.uuid4())
+        
+        # Save the result image to public folder
+        public_folder = "public/images"
+        Path(public_folder).mkdir(parents=True, exist_ok=True)
+        result_path = f"{public_folder}/{unique_id}.png"
+        cv2.imwrite(result_path, canvas)
+        
+        # Return URL path to the result image
+        result_url = f"/public/images/{unique_id}.png"
+    
+    # Compute additional fit predictions based on the difference and ratio of chest and waist measurements
+    def predict_shirt_fit(chest, waist):
+        diff = chest - waist
+        if diff > 15:
+            return "loose fit"
+        elif diff < 5:
+            return "slim fit"
+        else:
+            return "regular fit"
 
-    return {"shirt_size": shirt_size, "pants_size": pants_size}
+    def predict_pants_fit(chest, waist):
+        ratio = waist / chest if chest else 1
+        if ratio > 0.85:
+            return "loose fit"
+        elif ratio < 0.75:
+            return "slim fit"
+        else:
+            return "regular fit"
+    
+    
+
+    shirt_fit = predict_shirt_fit(chest_width, waist_width)
+    pants_fit = predict_pants_fit(chest_width, waist_width)
+
+    return {
+        "shirt_size": shirt_size,
+        "pants_size": pants_size,
+        "shirt_fit": shirt_fit,
+        "pants_fit": pants_fit,
+        "result_url": result_url
+    }
 
 @router.post("/predict-size-metrics/")
 async def predict_size_metrics(data: dict):
@@ -304,3 +347,10 @@ async def predict_size_metrics(data: dict):
         size_result.append(size_code[int(predicted_size)])
 
     return {"predicted_size": size_result}
+
+@router.get("/public/images/{image}")
+async def get_image(image: str):
+    image_path = Path("public/images") / image
+    if not image_path.exists():
+        raise HTTPException(status_code=404, detail="Image not found")
+    return FileResponse(str(image_path), media_type="image/png")
