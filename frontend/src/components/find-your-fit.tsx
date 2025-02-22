@@ -16,17 +16,20 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function FindYourFit({ id }: { id?: string }) {
-  const [step, setStep] = useState(id ? "result" : "input");
+  const [step, setStep] = useState("input");
   const [cameraFacing, setCameraFacing] = useState<"user" | "environment">(
     "user"
   );
+  const [age, setAge] = useState("");
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
-  const [age, setAge] = useState("");
-  const [result, setResult] = useState<{ image?: string; size?: string }>();
+  const [result, setResult] = useState<{ image?: string; size?: string }>(
+    id
+      ? { image: "/placeholder.svg?height=300&width=300", size: "M" }
+      : undefined
+  );
 
   const handleProceed = async () => {
-    // Simulate API call
     setStep("loading");
     await new Promise((resolve) => setTimeout(resolve, 2000));
     setResult({ image: "/placeholder.svg?height=300&width=300", size: "M" });
@@ -37,7 +40,7 @@ export default function FindYourFit({ id }: { id?: string }) {
 
   return (
     <div className="max-w-md mx-auto">
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="wait" initial={false}>
         {step === "input" && (
           <motion.div
             key="input"
@@ -50,6 +53,7 @@ export default function FindYourFit({ id }: { id?: string }) {
             <Camera facing={cameraFacing} />
             <div className="mt-4 mb-6">
               <Select
+                value={cameraFacing}
                 onValueChange={(value) =>
                   setCameraFacing(value as "user" | "environment")
                 }
@@ -88,12 +92,19 @@ export default function FindYourFit({ id }: { id?: string }) {
                   onChange={(e) => setAge(e.target.value)}
                 />
               </div>
-              <Button onClick={handleProceed} disabled={!isFormValid}>
+              <Button
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleProceed();
+                }}
+                disabled={!isFormValid}
+              >
                 Proceed
               </Button>
             </form>
           </motion.div>
         )}
+
         {step === "loading" && (
           <motion.div
             key="loading"
@@ -105,6 +116,7 @@ export default function FindYourFit({ id }: { id?: string }) {
             <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-primary"></div>
           </motion.div>
         )}
+
         {step === "result" && result && (
           <motion.div
             key="result"

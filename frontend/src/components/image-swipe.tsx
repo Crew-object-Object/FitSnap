@@ -37,10 +37,10 @@ interface SwipeCardsProps {
 }
 
 export default function SwipeCards({ props }: SwipeCardsProps) {
+  const router = useRouter();
   const [currentProfile, setCurrentProfile] = useState(0);
   const [direction, setDirection] = useState<string | null>(null);
   const [likes, setLikes] = useState(props.map((fit) => fit._count.swipes));
-  const router = useRouter();
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
