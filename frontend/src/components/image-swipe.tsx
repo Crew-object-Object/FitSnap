@@ -1,15 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence, type PanInfo } from "framer-motion";
+import Image from "next/image";
 import { Heart, X } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { motion, AnimatePresence, type PanInfo } from "framer-motion";
 
 interface Profile {
   id: number;
-  name: string;
   age: number;
+  name: string;
   image: string;
 }
 
@@ -99,10 +100,12 @@ export default function SwipeCards() {
             >
               <Card className="h-[400px] w-[300px]">
                 <CardContent className="p-0">
-                  <img
-                    src={profiles[currentProfile].image || "/placeholder.svg"}
+                  <Image
+                    width={100}
+                    height={100}
                     alt={profiles[currentProfile].name}
                     className="h-[300px] w-full object-cover"
+                    src={profiles[currentProfile].image || "/placeholder.svg"}
                   />
                   <div className="p-4">
                     <h2 className="text-2xl font-semibold">
