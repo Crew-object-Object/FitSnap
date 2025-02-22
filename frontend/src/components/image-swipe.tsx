@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { motion, AnimatePresence, PanInfo } from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence, type PanInfo } from "framer-motion";
 import { Heart, X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -44,6 +44,13 @@ export default function SwipeCards() {
   const [currentProfile, setCurrentProfile] = useState(0);
   const [direction, setDirection] = useState<string | null>(null);
 
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, []);
+
   const handleDragEnd = (
     event: MouseEvent | TouchEvent | PointerEvent,
     info: PanInfo
@@ -68,7 +75,7 @@ export default function SwipeCards() {
   };
 
   return (
-    <div className="flex flex-col items-center gap-6 p-4">
+    <div className="flex flex-col items-center gap-6 p-4 overflow-hidden touch-action-none min-h-[calc(100vh-2rem)]">
       <div className="relative h-[400px] w-[300px]">
         <AnimatePresence>
           {currentProfile < profiles.length && (
@@ -86,8 +93,9 @@ export default function SwipeCards() {
               transition={{ duration: 0.2 }}
               drag="x"
               dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={1}
               onDragEnd={handleDragEnd}
-              className="absolute cursor-grab active:cursor-grabbing"
+              className="absolute cursor-grab active:cursor-grabbing touch-none"
             >
               <Card className="h-[400px] w-[300px]">
                 <CardContent className="p-0">

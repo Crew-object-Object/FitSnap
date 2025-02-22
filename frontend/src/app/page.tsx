@@ -1,4 +1,4 @@
-import SwipeCards from "@/components/ImageSwipe";
+import SwipeCards from "@/components/image-swipe";
 
 export default function Home() {
   return (
