@@ -29,17 +29,10 @@ export function CreateFit() {
     formData.append("image", imageUrl || "");
     formData.append("tags", JSON.stringify(tags));
 
-    console.log("Form Data:");
-    console.log({
-      tags: tags,
-      image: imageUrl,
-      description: formData.get("description"),
-    });
-
     toast.promise(createFit(formData), {
-      loading: "Saving...",
-      success: <b>Settings saved!</b>,
-      error: <b>Could not save.</b>,
+      loading: "Creating fit...",
+      success: <b>Fit created successfully!</b>,
+      error: <b>Failed to create fit. Please try again.</b>,
     });
   };
 
