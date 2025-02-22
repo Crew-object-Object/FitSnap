@@ -1,16 +1,16 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion, AnimatePresence, PanInfo } from "framer-motion"
-import { Heart, X } from 'lucide-react'
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { useState } from "react";
+import { motion, AnimatePresence, PanInfo } from "framer-motion";
+import { Heart, X } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 interface Profile {
-  id: number
-  name: string
-  age: number
-  image: string
+  id: number;
+  name: string;
+  age: number;
+  image: string;
 }
 
 const profiles: Profile[] = [
@@ -38,31 +38,34 @@ const profiles: Profile[] = [
     age: 30,
     image: "/placeholder.svg?height=400&width=300",
   },
-]
+];
 
 export default function SwipeCards() {
-  const [currentProfile, setCurrentProfile] = useState(0)
-  const [direction, setDirection] = useState<string | null>(null)
+  const [currentProfile, setCurrentProfile] = useState(0);
+  const [direction, setDirection] = useState<string | null>(null);
 
-  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    const swipeThreshold = 100
+  const handleDragEnd = (
+    event: MouseEvent | TouchEvent | PointerEvent,
+    info: PanInfo
+  ) => {
+    const swipeThreshold = 100;
     if (Math.abs(info.offset.x) > swipeThreshold) {
-      const direction = info.offset.x > 0 ? "right" : "left"
-      setDirection(direction)
+      const direction = info.offset.x > 0 ? "right" : "left";
+      setDirection(direction);
       setTimeout(() => {
-        setCurrentProfile((prev) => (prev + 1) % profiles.length)
-        setDirection(null)
-      }, 200)
+        setCurrentProfile((prev) => (prev + 1) % profiles.length);
+        setDirection(null);
+      }, 200);
     }
-  }
+  };
 
   const handleButtonClick = (direction: "left" | "right") => {
-    setDirection(direction)
+    setDirection(direction);
     setTimeout(() => {
-      setCurrentProfile((prev) => (prev + 1) % profiles.length)
-      setDirection(null)
-    }, 200)
-  }
+      setCurrentProfile((prev) => (prev + 1) % profiles.length);
+      setDirection(null);
+    }, 200);
+  };
 
   return (
     <div className="flex flex-col items-center gap-6 p-4">
@@ -74,8 +77,10 @@ export default function SwipeCards() {
               initial={{ scale: 1 }}
               animate={{
                 scale: 1,
-                rotate: direction === "left" ? -20 : direction === "right" ? 20 : 0,
-                x: direction === "left" ? -200 : direction === "right" ? 200 : 0,
+                rotate:
+                  direction === "left" ? -20 : direction === "right" ? 20 : 0,
+                x:
+                  direction === "left" ? -200 : direction === "right" ? 200 : 0,
               }}
               exit={{ scale: 0.8, opacity: 0 }}
               transition={{ duration: 0.2 }}
@@ -93,7 +98,8 @@ export default function SwipeCards() {
                   />
                   <div className="p-4">
                     <h2 className="text-2xl font-semibold">
-                      {profiles[currentProfile].name}, {profiles[currentProfile].age}
+                      {profiles[currentProfile].name},{" "}
+                      {profiles[currentProfile].age}
                     </h2>
                   </div>
                 </CardContent>
@@ -122,5 +128,5 @@ export default function SwipeCards() {
         </Button>
       </div>
     </div>
-  )
+  );
 }
