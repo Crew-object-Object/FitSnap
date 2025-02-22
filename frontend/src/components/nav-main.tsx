@@ -18,6 +18,7 @@ import {
   LayoutDashboardIcon,
   Trophy,
   Shirt,
+  PlusCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -57,6 +58,7 @@ export function SidebarNavigation() {
         { label: "Find Your Fit", href: "/find-your-fit", icon: Shirt },
         { label: "Leaderboard", href: "/leaderboard", icon: Trophy },
         { label: "Profile", href: "/profile", icon: User2 },
+        { label: "Create Your Fit", href: "/fit", icon: PlusCircle },
       ],
     },
   ];
