@@ -5,11 +5,9 @@ import { motion, AnimatePresence, type PanInfo } from "framer-motion";
 import { Heart } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { TypographyH3 } from "./typography/H3";
-import { TypographyP } from "./typography/P";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
-import { Fit } from "@prisma/client";
+import type { Fit } from "@prisma/client";
 import Image from "next/image";
 import { swiped } from "@/actions/swipe";
 
@@ -18,10 +16,9 @@ interface SwipeCardsProps {
 }
 
 export default function SwipeCards({ props }: SwipeCardsProps) {
-  console.log(props);
   const [currentProfile, setCurrentProfile] = useState(0);
   const [direction, setDirection] = useState<string | null>(null);
-  const [likes, setLikes] = useState(props.map(() => 0));
+  const [, setLikes] = useState(props.map(() => 0));
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -31,7 +28,6 @@ export default function SwipeCards({ props }: SwipeCardsProps) {
   }, []);
 
   async function Swipe(direction: string, fitData: Fit) {
-    console.log(props);
     const formData = new FormData();
     formData.append("direction", direction);
     formData.append("fitData", JSON.stringify(fitData));
@@ -65,8 +61,8 @@ export default function SwipeCards({ props }: SwipeCardsProps) {
   };
 
   return (
-    <div className="flex flex-col items-center gap-6 p-4 overflow-hidden touch-action-none min-h-[calc(100vh-2rem)]">
-      <div className="relative h-[400px] w-[300px]">
+    <div className="flex flex-col items-center justify-center min-h-screen py-8 overflow-hidden touch-none">
+      <div className="w-full max-w-sm">
         <AnimatePresence>
           {currentProfile < props.length && (
             <motion.div
@@ -85,46 +81,43 @@ export default function SwipeCards({ props }: SwipeCardsProps) {
               dragConstraints={{ left: 0, right: 0 }}
               dragElastic={1}
               onDragEnd={handleDragEnd}
-              className="absolute cursor-grab active:cursor-grabbing touch-none"
+              className="cursor-grab active:cursor-grabbing touch-none"
             >
-              <Card className="h-full w-[300px]">
+              <Card className="overflow-hidden shadow-lg relative gradient-border">
                 <CardContent className="p-0">
-                  <Image
-                    src={props[currentProfile].image || "/placeholder.svg"}
-                    alt={`Fit Image ${currentProfile + 1}`}
-                    width={300}
-                    height={300}
-                  />
-                  <div className="p-2 bg-primary flex justify-between items-center">
-                    <div className="flex items-center gap-4">
-                      <Avatar className="w-12 h-12">
-                        <AvatarImage src="https://github.com/shadcn.png" />
-                        <AvatarFallback>CN</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <TypographyH3>Fit #{currentProfile + 1}</TypographyH3>
-                        <TypographyP>
-                          {props[currentProfile].description}
-                        </TypographyP>
+                  <div className="relative aspect-[3/5] w-full">
+                    <Image
+                      src={props[currentProfile].image || "/placeholder.svg"}
+                      alt={`Fit Image ${currentProfile + 1}`}
+                      fill
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/70" />
+                    <div className="absolute bottom-0 left-0 right-0 p-6 text-foreground">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <TypographyH3>Fit #{currentProfile + 1}</TypographyH3>
+                          <p className="text-base text-gray-200">
+                            {props[currentProfile].description}
+                          </p>
+                        </div>
+                        <Button
+                          onClick={handleLike}
+                          variant="secondary"
+                          size="icon"
+                          className="bg-foreground/20 hover:bg-foreground/30 text-foreground rounded-full p-3"
+                        >
+                          <Heart className="w-8 h-8" />
+                        </Button>
+                      </div>
+                      <div className="flex flex-wrap gap-2 mt-4">
+                        {props[currentProfile].tags.map((tag, index) => (
+                          <Badge key={index} className="text-sm px-3 py-1 bg-foreground/20">
+                            {tag}
+                          </Badge>
+                        ))}
                       </div>
                     </div>
-                    <div className="flex flex-col items-center">
-                      <Button onClick={handleLike} variant="secondary">
-                        <Heart className="w-8 h-8" />
-                      </Button>
-                      <TypographyP>{likes[currentProfile]} Likes</TypographyP>
-                    </div>
-                  </div>
-                  <div className="p-4 flex flex-wrap gap-2">
-                    {props[currentProfile].tags.map((tag, index) => (
-                      <Badge
-                        key={index}
-                        variant="secondary"
-                        className="rounded-full px-3 py-1"
-                      >
-                        {tag}
-                      </Badge>
-                    ))}
                   </div>
                 </CardContent>
               </Card>
