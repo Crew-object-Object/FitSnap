@@ -19,7 +19,8 @@ model User {
   sessions      Session[]
   accounts      Account[]
 
-  fits          Fit[]
+  fits  Fit[]
+  Swipe Swipe[]
 
   @@unique([email])
   @@map("user")
@@ -77,6 +78,23 @@ model Fit {
   image       String
   tags        String[]
   description String
+  swipes      Swipe[]
 
   @@map("fit")
+}
+
+model Swipe {
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  id        String    @id @default(cuid())
+  fit       Fit       @relation(fields: [fitId], references: [id])
+  fitId     String
+  swipeType SwipeType
+
+  @@map("swipe")
+}
+
+enum SwipeType {
+  Like
+  Dislike
 }

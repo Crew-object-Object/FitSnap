@@ -1,49 +1,24 @@
 "use client";
 
-import Image from "next/image";
-import { Heart, X } from "lucide-react";
 import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { motion, AnimatePresence, type PanInfo } from "framer-motion";
+import { Heart } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { TypographyH3 } from "./typography/H3";
+import { Badge } from "./ui/badge";
+import { Button } from "./ui/button";
+import type { Fit } from "@prisma/client";
+import Image from "next/image";
+import { swiped } from "@/actions/swipe";
 
-interface Profile {
-  id: number;
-  age: number;
-  name: string;
-  image: string;
+interface SwipeCardsProps {
+  props: Fit[];
 }
 
-const profiles: Profile[] = [
-  {
-    id: 1,
-    name: "Sarah",
-    age: 28,
-    image: "/placeholder.svg?height=400&width=300",
-  },
-  {
-    id: 2,
-    name: "James",
-    age: 32,
-    image: "/placeholder.svg?height=400&width=300",
-  },
-  {
-    id: 3,
-    name: "Emma",
-    age: 25,
-    image: "/placeholder.svg?height=400&width=300",
-  },
-  {
-    id: 4,
-    name: "Michael",
-    age: 30,
-    image: "/placeholder.svg?height=400&width=300",
-  },
-];
-
-export default function SwipeCards() {
+export default function SwipeCards({ props }: SwipeCardsProps) {
   const [currentProfile, setCurrentProfile] = useState(0);
   const [direction, setDirection] = useState<string | null>(null);
+  const [, setLikes] = useState(props.map(() => 0));
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -52,36 +27,45 @@ export default function SwipeCards() {
     };
   }, []);
 
+  async function Swipe(direction: string, fitData: Fit) {
+    const formData = new FormData();
+    formData.append("direction", direction);
+    formData.append("fitData", JSON.stringify(fitData));
+
+    await swiped(formData);
+  }
+
   const handleDragEnd = (
     event: MouseEvent | TouchEvent | PointerEvent,
     info: PanInfo
   ) => {
     const swipeThreshold = 100;
     if (Math.abs(info.offset.x) > swipeThreshold) {
-      const direction = info.offset.x > 0 ? "right" : "left";
-      setDirection(direction);
+      const newDirection = info.offset.x > 0 ? "right" : "left";
+      setDirection(newDirection);
+      Swipe(newDirection, props[currentProfile]);
       setTimeout(() => {
-        setCurrentProfile((prev) => (prev + 1) % profiles.length);
+        setCurrentProfile((prev) => (prev + 1) % props.length);
         setDirection(null);
       }, 200);
     }
   };
 
-  const handleButtonClick = (direction: "left" | "right") => {
-    setDirection(direction);
-    setTimeout(() => {
-      setCurrentProfile((prev) => (prev + 1) % profiles.length);
-      setDirection(null);
-    }, 200);
+  const handleLike = () => {
+    setLikes((prevLikes) =>
+      prevLikes.map((like, index) =>
+        index === currentProfile ? like + 1 : like
+      )
+    );
   };
 
   return (
-    <div className="flex flex-col items-center gap-6 p-4 overflow-hidden touch-action-none min-h-[calc(100vh-2rem)]">
-      <div className="relative h-[400px] w-[300px]">
+    <div className="flex flex-col items-center justify-center min-h-screen py-8 overflow-hidden touch-none">
+      <div className="w-full max-w-sm">
         <AnimatePresence>
-          {currentProfile < profiles.length && (
+          {currentProfile < props.length && (
             <motion.div
-              key={profiles[currentProfile].id}
+              key={props[currentProfile].id}
               initial={{ scale: 1 }}
               animate={{
                 scale: 1,
@@ -96,47 +80,52 @@ export default function SwipeCards() {
               dragConstraints={{ left: 0, right: 0 }}
               dragElastic={1}
               onDragEnd={handleDragEnd}
-              className="absolute cursor-grab active:cursor-grabbing touch-none"
+              className="cursor-grab active:cursor-grabbing touch-none"
             >
-              <Card className="h-[400px] w-[300px]">
+              <Card className="overflow-hidden shadow-lg relative gradient-border">
                 <CardContent className="p-0">
-                  <Image
-                    width={100}
-                    height={100}
-                    alt={profiles[currentProfile].name}
-                    className="h-[300px] w-full object-cover"
-                    src={profiles[currentProfile].image || "/placeholder.svg"}
-                  />
-                  <div className="p-4">
-                    <h2 className="text-2xl font-semibold">
-                      {profiles[currentProfile].name},{" "}
-                      {profiles[currentProfile].age}
-                    </h2>
+                  <div className="relative aspect-[3/5] w-full">
+                    <Image
+                      src={props[currentProfile].image || "/placeholder.svg"}
+                      alt={`Fit Image ${currentProfile + 1}`}
+                      fill
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/70" />
+                    <div className="absolute bottom-0 left-0 right-0 p-6 text-foreground">
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <TypographyH3>{}</TypographyH3>
+                          <p className="text-base text-gray-200">
+                            {props[currentProfile].description}
+                          </p>
+                        </div>
+                        <Button
+                          onClick={handleLike}
+                          variant="secondary"
+                          size="icon"
+                          className="bg-foreground/20 hover:bg-foreground/30 text-foreground rounded-full p-3"
+                        >
+                          <Heart className="w-8 h-8" />
+                        </Button>
+                      </div>
+                      <div className="flex flex-wrap gap-2 mt-4">
+                        {props[currentProfile].tags.map((tag, index) => (
+                          <Badge
+                            key={index}
+                            className="text-sm px-3 py-1 bg-foreground/20"
+                          >
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
-
-      <div className="flex gap-4">
-        <Button
-          size="icon"
-          variant="outline"
-          className="h-14 w-14 rounded-full"
-          onClick={() => handleButtonClick("left")}
-        >
-          <X className="h-6 w-6" />
-        </Button>
-        <Button
-          size="icon"
-          variant="outline"
-          className="h-14 w-14 rounded-full"
-          onClick={() => handleButtonClick("right")}
-        >
-          <Heart className="h-6 w-6" />
-        </Button>
       </div>
     </div>
   );

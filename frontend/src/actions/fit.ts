@@ -1,33 +1,39 @@
 "use server";
 
+import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 
 export async function createFit(formData: FormData) {
-  try {
-    const image = formData.get("image") as string;
-    const userId = formData.get("userId") as string;
-    const tags =
-      (formData.get("tags") as string)?.split(",").map((t) => t.trim()) || [];
-    const description = formData.get("description") as string;
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) redirect("/login");
 
-    if (!userId || !image || !description) {
-      return { success: false, error: "All fields except tags are required" };
-    }
+  const userId = session.user.id;
+  const rawTags = formData.get("tags") as string;
+  const image = (formData.get("image") as string) || "aaa";
+  const description = formData.get("description") as string;
 
-    const fit = await prisma.fit.create({
-      data: {
-        userId,
-        image,
-        tags,
-        description,
-      },
-    });
-
-    return { success: true, fit };
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Something went wrong",
-    };
+  if (!userId || !image || !description) {
+    throw new Error("All fields except tags are required.");
   }
+
+  let tags: string[] = [];
+  try {
+    tags = JSON.parse(rawTags);
+    if (!Array.isArray(tags)) throw new Error();
+  } catch {
+    tags = rawTags?.split(",").map((t) => t.trim()) || [];
+  }
+
+  const fit = await prisma.fit.create({
+    data: {
+      tags,
+      image,
+      userId,
+      description,
+    },
+  });
+
+  return fit;
 }
