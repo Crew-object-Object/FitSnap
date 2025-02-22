@@ -11,7 +11,12 @@ export default async function DashboardPage() {
   let data = await prisma.fit.findMany({
     where: {
       userId: {
-        not: user?.session.id,
+        not: user?.user.id,
+      },
+      swipes: {
+        every: {
+          userId: user?.user.id,
+        },
       },
     },
     include: {
@@ -38,7 +43,7 @@ export default async function DashboardPage() {
   });
 
   data = data.sort((a, b) => b._count.swipes - a._count.swipes);
-console.log(data)
+
   return (
     <div className="w-full h-full">
       <SwipeCards props={data} />

@@ -7,21 +7,26 @@ import { Card, CardContent } from "@/components/ui/card";
 import { TypographyH3 } from "./typography/H3";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
-import type { Fit } from "@prisma/client";
+import type { Fit, Swipe } from "@prisma/client";
 import Image from "next/image";
 import { swiped } from "@/actions/swipe";
 import { DockDemo } from "./emoji-dock";
 import { useSession } from "@/lib/auth-client";
 
 interface SwipeCardsProps {
-  props: Fit[];
+  props: (Fit & {
+    swipes: Swipe[];
+    _count: {
+      swipes: number;
+    };
+  })[];
 }
 
 export default function SwipeCards({ props }: SwipeCardsProps) {
   const session = useSession();
   const [currentProfile, setCurrentProfile] = useState(0);
   const [direction, setDirection] = useState<string | null>(null);
-  const [, setLikes] = useState(props.map(() => 0));
+  const [likes, setLikes] = useState(props.map((fit) => fit._count.swipes));
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -63,7 +68,7 @@ export default function SwipeCards({ props }: SwipeCardsProps) {
   };
 
   return (
-    <div className="flex flex-col items-center justify-start min-h-screen overflow-hidden touch-none pt-12">
+    <div className="flex flex-col items-center justify-start min-h-screen overflow-hidden touch-none">
       <div className="w-full max-w-sm mt-4">
         <AnimatePresence>
           {currentProfile < props.length && (
@@ -89,6 +94,7 @@ export default function SwipeCards({ props }: SwipeCardsProps) {
                 <CardContent className="p-0">
                   <div className="relative aspect-[3/5] w-full">
                     <Image
+                      unoptimized
                       src={props[currentProfile].image || "/placeholder.svg"}
                       alt={`Fit Image ${currentProfile + 1}`}
                       fill
@@ -103,15 +109,19 @@ export default function SwipeCards({ props }: SwipeCardsProps) {
                             {props[currentProfile].description}
                           </p>
                         </div>
-                        <Button
-                          onClick={handleLike}
-                          variant="secondary"
-                          size="icon"
-                          className="bg-foreground/20 hover:bg-foreground/30 text-foreground rounded-full p-3"
-                        >
-                          <Heart className="w-8 h-8" />
-                          {/* {props.data[0]._count.swipes} */}
-                        </Button>
+                        <div className="flex flex-col items-center gap-1">
+                          <Button
+                            onClick={handleLike}
+                            variant="secondary"
+                            size="icon"
+                            className="bg-primary/75 hover:bg-foreground/30 text-foreground rounded-full p-3"
+                          >
+                            <Heart className="w-8 h-8" />
+                          </Button>
+                          <span className="text-sm font-medium text-white">
+                            {likes[currentProfile]}
+                          </span>
+                        </div>
                       </div>
                       <div className="flex flex-wrap gap-2 mt-4">
                         {props[currentProfile].tags.map((tag, index) => (
