@@ -8,13 +8,12 @@ const withSerwist = withSerwistInit({
 
 const nextConfig: NextConfig = {
   images: {
-    domains: ["h6q45r0c51.ufs.sh"],
     remotePatterns: [
       {
         protocol: "https",
         hostname: "utfs.io",
         port: "",
-        pathname: "/f/**",
+        pathname: "/a/**",
         search: "",
       },
       {
@@ -22,6 +21,13 @@ const nextConfig: NextConfig = {
         hostname: "h6q45r0c51.ufs.sh",
         port: "",
         pathname: "",
+        search: "",
+      },
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+        port: "",
+        pathname: "/a/**",
         search: "",
       },
     ],
@@ -37,4 +43,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSerwist(nextConfig);

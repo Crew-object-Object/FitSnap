@@ -6,8 +6,9 @@ import { Toaster } from "react-hot-toast";
 import { ThemeProvider } from "next-themes";
 
 export const metadata: Metadata = {
-  title: "Create Next App",
-  description: "Created by create-next-app",
+  title: "FitSnap | AI Size Predictor",
+  description:
+    "An AI-powered solution that predicts a user's shoulder width, chest, and waist measurements based on height and recommends the best clothing size for t-shirts, shirts, and pants.",
 };
 
 const inter = Inter({
@@ -26,18 +27,20 @@ export default function RootLayout({
       <body
         className={cn(
           inter.className,
-          "min-h-screen min-w-full overflow-y-auto overflow-x-hidden"
+          "min-h-screen min-w-full overflow-y-auto overflow-x-hidden shadow-md relative"
         )}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <Toaster reverseOrder={false} position="bottom-right" />
-          {children}
-        </ThemeProvider>
+        <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-primary/30 via-transparent to-background">
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <Toaster reverseOrder={false} position="bottom-right" />
+            {children}
+          </ThemeProvider>
+        </div>
       </body>
     </html>
   );

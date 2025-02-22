@@ -18,6 +18,7 @@ import {
   LayoutDashboardIcon,
   Trophy,
   Shirt,
+  PlusCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -40,7 +41,7 @@ export function HomeButton() {
     >
       <Link className="text-xl font-semibold w-full p-2" href="/">
         <Image alt="logo" width={48} height={48} src="/favicon.png" />
-        YogaSense
+        FitSnap
       </Link>
     </Button>
   );
@@ -56,6 +57,8 @@ export function SidebarNavigation() {
         { label: "Dashboard", href: "/dashboard", icon: LayoutDashboardIcon },
         { label: "Find Your Fit", href: "/find-your-fit", icon: Shirt },
         { label: "Leaderboard", href: "/leaderboard", icon: Trophy },
+        { label: "Profile", href: "/profile", icon: User2 },
+        { label: "Create Your Fit", href: "/fit", icon: PlusCircle },
       ],
     },
   ];
@@ -92,11 +95,6 @@ export function UserDropdownButtons() {
       <DropdownMenuItem asChild>
         <Link href="/settings" onClick={() => setOpenMobile(false)}>
           <CogIcon /> Settings
-        </Link>
-      </DropdownMenuItem>
-      <DropdownMenuItem asChild>
-        <Link href="/profile" onClick={() => setOpenMobile(false)}>
-          <User2 /> Profile
         </Link>
       </DropdownMenuItem>
       <DropdownMenuItem

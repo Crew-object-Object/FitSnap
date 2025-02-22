@@ -12,6 +12,7 @@ import { TypographyH3 } from "./typography/H3";
 import type { Fit, Prisma, Swipe } from "@prisma/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion, AnimatePresence, type PanInfo } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 interface SwipeCardsProps {
   props: Prisma.FitGetPayload<{
@@ -36,6 +37,7 @@ interface SwipeCardsProps {
 }
 
 export default function SwipeCards({ props }: SwipeCardsProps) {
+  const router = useRouter();
   const [currentProfile, setCurrentProfile] = useState(0);
   const [direction, setDirection] = useState<string | null>(null);
   const [likes, setLikes] = useState(props.map((fit) => fit._count.swipes));
@@ -53,6 +55,9 @@ export default function SwipeCards({ props }: SwipeCardsProps) {
     formData.append("fitData", JSON.stringify(fitData));
 
     await swiped(formData);
+    if (direction === "right") {
+      router.push(`/find-your-fit/${fitData.id}`);
+    }
   }
 
   const handleDragEnd = (
@@ -80,7 +85,7 @@ export default function SwipeCards({ props }: SwipeCardsProps) {
   };
 
   return (
-    <div className="flex flex-col items-center justify-start min-h-screen overflow-hidden touch-none">
+    <div className="flex flex-col items-center justify-start min-h-screen overflow-hidden touch-none py-8">
       <div className="w-full max-w-sm mt-4">
         <AnimatePresence>
           {currentProfile < props.length && (

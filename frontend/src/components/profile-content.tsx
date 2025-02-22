@@ -1,17 +1,39 @@
-"use client";
-
 import Image from "next/image";
+import prisma from "@/lib/prisma";
 import { Card } from "@/components/ui/card";
 import { ChevronRight } from "lucide-react";
+import { useSession } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
-export function ProfileContent() {
+export async function ProfileContent() {
+  const data = await prisma.user.findMany({
+    where: {
+      Swipe: {
+        some: {},
+      },
+    },
+    orderBy: {
+      Swipe: {
+        _count: "desc",
+      },
+    },
+  });
+
+  const user = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  const userId = user?.user.id;
+
+  const userRank = data.findIndex((user) => user.id === userId) + 1;
+
   return (
     <div className="container mx-auto px-4 pt-20">
-      {/* Rank Bar */}
       <div className="max-w-md mx-auto mb-12">
         <div className="bg-teal-400 text-white text-center py-3 rounded-lg text-lg font-medium">
-          Rank
+          {`Rank: ${userRank}`}
         </div>
       </div>
 

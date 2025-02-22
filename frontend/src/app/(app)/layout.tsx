@@ -2,6 +2,7 @@ import { Toaster } from "sonner";
 import { ReactNode } from "react";
 import { Separator } from "@/components/ui/separator";
 import { AppSidebar } from "@/components/app-sidebar";
+import AuthMiddleware from "@/components/auth-middleware";
 import { LinkBreadcrumbs } from "@/components/link-breadcrumbs";
 import { SwEventsHandler } from "@/components/sw-events-handler";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -9,6 +10,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 export default function AppLayout({ children }: { children: ReactNode }) {
   return (
     <>
+      <AuthMiddleware />
       <SidebarProvider>
         <AppSidebar />
         <SwEventsHandler />
