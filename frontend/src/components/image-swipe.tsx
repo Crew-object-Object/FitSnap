@@ -12,6 +12,7 @@ import { TypographyH3 } from "./typography/H3";
 import type { Fit, Prisma, Swipe } from "@prisma/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion, AnimatePresence, type PanInfo } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 interface SwipeCardsProps {
   props: Prisma.FitGetPayload<{
@@ -39,6 +40,7 @@ export default function SwipeCards({ props }: SwipeCardsProps) {
   const [currentProfile, setCurrentProfile] = useState(0);
   const [direction, setDirection] = useState<string | null>(null);
   const [likes, setLikes] = useState(props.map((fit) => fit._count.swipes));
+  const router = useRouter();
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -53,6 +55,9 @@ export default function SwipeCards({ props }: SwipeCardsProps) {
     formData.append("fitData", JSON.stringify(fitData));
 
     await swiped(formData);
+    if (direction === "right") {
+      router.push(`/find-your-fit/${fitData.id}`);
+    }
   }
 
   const handleDragEnd = (
