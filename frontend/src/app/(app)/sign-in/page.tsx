@@ -1,21 +1,21 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import {
   Card,
+  CardTitle,
+  CardHeader,
   CardContent,
   CardDescription,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { signIn } from "@/lib/auth-client";
-import { cn } from "@/lib/utils";
-import { Loader2 } from "lucide-react";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { Loader2 } from "lucide-react";
+import { signIn } from "@/lib/auth-client";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
