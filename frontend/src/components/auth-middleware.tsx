@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useSession } from "@/lib/auth-client";
 
 export default function AuthMiddleware() {
@@ -9,10 +9,10 @@ export default function AuthMiddleware() {
   const session = useSession();
 
   useEffect(() => {
-    if (!session.data) {
+    if (!session.isPending && !session.data?.user) {
       router.push("/sign-in");
     }
-  }, [session.data?.user, router]);
+  }, [session.isPending, session.data?.user]);
 
   return null;
 }

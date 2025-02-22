@@ -1,7 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import prisma from "@/lib/prisma";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Heart } from "lucide-react";
@@ -9,7 +8,7 @@ import { DockDemo } from "./emoji-dock";
 import { swiped } from "@/actions/swipe";
 import { useState, useEffect } from "react";
 import { TypographyH3 } from "./typography/H3";
-import type { Fit, Prisma, Swipe } from "@prisma/client";
+import type { Fit, Prisma } from "@prisma/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion, AnimatePresence, type PanInfo } from "framer-motion";
 import { useRouter } from "next/navigation";
@@ -69,6 +68,7 @@ export default function SwipeCards({ props }: SwipeCardsProps) {
       const newDirection = info.offset.x > 0 ? "right" : "left";
       setDirection(newDirection);
       Swipe(newDirection, props[currentProfile]);
+
       setTimeout(() => {
         setCurrentProfile((prev) => (prev + 1) % props.length);
         setDirection(null);
@@ -161,7 +161,7 @@ export default function SwipeCards({ props }: SwipeCardsProps) {
         </AnimatePresence>
       </div>
       <div className="mt-auto w-full flex justify-center pb-6">
-        <DockDemo />
+        <DockDemo id={props[currentProfile].id} />
       </div>
     </div>
   );
