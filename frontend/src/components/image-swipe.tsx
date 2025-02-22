@@ -10,6 +10,7 @@ import { Button } from "./ui/button";
 import type { Fit } from "@prisma/client";
 import Image from "next/image";
 import { swiped } from "@/actions/swipe";
+import { DockDemo } from "./emoji-dock";
 import { useSession } from "@/lib/auth-client";
 
 interface SwipeCardsProps {
@@ -62,8 +63,8 @@ export default function SwipeCards({ props }: SwipeCardsProps) {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-8 overflow-hidden touch-none">
-      <div className="w-full max-w-sm">
+    <div className="flex flex-col items-center justify-start min-h-screen overflow-hidden touch-none pt-12">
+      <div className="w-full max-w-sm mt-4">
         <AnimatePresence>
           {currentProfile < props.length && (
             <motion.div
@@ -129,6 +130,9 @@ export default function SwipeCards({ props }: SwipeCardsProps) {
             </motion.div>
           )}
         </AnimatePresence>
+      </div>
+      <div className="mt-auto w-full flex justify-center pb-6">
+        <DockDemo />
       </div>
     </div>
   );
