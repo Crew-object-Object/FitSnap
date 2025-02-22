@@ -14,6 +14,8 @@ import requests
 import uuid
 from fastapi.responses import FileResponse
 from fastapi import HTTPException
+from network import U2NET
+import torch
 
 def process_image(image_path, output_path, overlay_path):
     device = 'cpu'
@@ -275,29 +277,81 @@ async def predict_size(file: UploadFile = File(...), fit_url: str = Form(None)):
         # Return URL path to the result image
         result_url = f"/public/images/{unique_id}.png"
     
-    # Compute additional fit predictions based on the difference and ratio of chest and waist measurements
-    def predict_shirt_fit(chest, waist):
+    # Helper function to perform segmentation using U2NET to obtain a binary body mask
+    def u2net_segment(image_path):
+        # Load the U2NET model (here we create a new instance; in practice, load pre-trained weights)
+        model_u2 = U2NET(in_ch=3, out_ch=1)
+        model_u2.eval()
+        # Open the image with PIL and resize it to the expected input size (here, 320x320 as an example)
+        pil_img = Image.open(image_path).convert("RGB")
+        pil_img = pil_img.resize((320, 320))
+        img_np = np.array(pil_img, dtype=np.float32) / 255.0
+        # Convert to tensor and add a batch dimension; change HWC to CHW
+        tensor = torch.from_numpy(img_np).permute(2, 0, 1).unsqueeze(0)
+        with torch.no_grad():
+            # Forward pass: get the mask from the model; use [0] to extract the correct output as in predict_shirt_fit
+            mask = model_u2(tensor)[0]
+        # Squeeze batch and channel dimensions and threshold the output to get a binary mask
+        mask_np = mask.squeeze().cpu().numpy()
+        binary_mask = (mask_np > 0.5).astype(np.uint8)
+        return binary_mask
+
+    # Compute additional fit predictions using U2NET segmentation proportions
+    # Updated U2NET-based shirt fit prediction function
+    def predict_shirt_fit(chest, waist, fit_image_path):
+        # Obtain segmentation mask using U2NET
+        model_u2 = U2NET(in_ch=3, out_ch=1)
+        model_u2.eval()
+        pil_img = Image.open(fit_image_path).convert("RGB")
+        pil_img = pil_img.resize((320, 320))
+        img_np = np.array(pil_img, dtype=np.float32) / 255.0
+        tensor = torch.from_numpy(img_np).permute(2, 0, 1).unsqueeze(0)
+        with torch.no_grad():
+            mask = model_u2(tensor)[0]
+        mask = mask.squeeze().cpu().numpy()
+        mask = (mask > 0.5).astype(np.uint8)
+        h, w = mask.shape
+        upper_body_area = np.sum(mask[:h//2, :])
+        lower_body_area = np.sum(mask[h//2:, :])
+        area_ratio = upper_body_area / (lower_body_area + 1e-5)
+        
         diff = chest - waist
-        if diff > 15:
-            return "loose fit"
-        elif diff < 5:
-            return "slim fit"
+        if diff > 10:
+            base_fit = "loose fit"
+        elif diff < 2:
+            base_fit = "slim fit"
         else:
-            return "regular fit"
+            base_fit = "regular fit"
+        
+        if area_ratio > 1.1:
+            return base_fit + " (considering higher upper body proportion)"
+        elif area_ratio < 0.9:
+            return base_fit + " (considering lower upper body proportion)"
+        else:
+            return base_fit
 
-    def predict_pants_fit(chest, waist):
+    # Updated U2NET-based pants fit prediction function
+    def predict_pants_fit(chest, waist, fit_image_path):
+        mask = u2net_segment(fit_image_path)
+        h, w = mask.shape
+        lower_body_area = np.sum(mask[h//2:, :])
+        total_area = np.sum(mask)
+        lower_body_proportion = lower_body_area / (total_area + 1e-5)
         ratio = waist / chest if chest else 1
-        if ratio > 0.85:
-            return "loose fit"
-        elif ratio < 0.75:
-            return "slim fit"
+        if ratio > 0.95:
+            base_fit = "loose fit"
+        elif ratio < 0.85:
+            base_fit = "slim fit"
         else:
-            return "regular fit"
-    
-    
+            base_fit = "regular fit"
+        
+        if lower_body_proportion > 0.55:
+            return base_fit + " (considering higher lower body fat)"
+        else:
+            return base_fit
 
-    shirt_fit = predict_shirt_fit(chest_width, waist_width)
-    pants_fit = predict_pants_fit(chest_width, waist_width)
+    shirt_fit = predict_shirt_fit(chest_width, waist_width, fit_path)
+    pants_fit = predict_pants_fit(chest_width, waist_width, fit_path)
 
     return {
         "shirt_size": shirt_size,
