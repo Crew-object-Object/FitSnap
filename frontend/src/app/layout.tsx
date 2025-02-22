@@ -26,18 +26,20 @@ export default function RootLayout({
       <body
         className={cn(
           inter.className,
-          "min-h-screen min-w-full overflow-y-auto overflow-x-hidden"
+          "min-h-screen min-w-full overflow-y-auto overflow-x-hidden shadow-md relative"
         )}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <Toaster reverseOrder={false} position="bottom-right" />
-          {children}
-        </ThemeProvider>
+        <div className="absolute top-0 left-0 w-full h-1/2 bg-gradient-to-b from-primary/30 via-transparent to-background">
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <Toaster reverseOrder={false} position="bottom-right" />
+            {children}
+          </ThemeProvider>
+        </div>
       </body>
     </html>
   );
