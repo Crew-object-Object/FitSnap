@@ -8,47 +8,20 @@ import { TypographyH3 } from "./typography/H3";
 import { TypographyP } from "./typography/P";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Badge } from "./ui/badge";
+import { Button } from "./ui/button";
+import { Fit } from "@prisma/client";
+import Image from "next/image";
+import { swiped } from "@/actions/swipe";
 
-interface Profile {
-  id: number;
-  name: string;
-  age: number;
-  image: string;
-  tags: string[];
-  likes: number;
+interface SwipeCardsProps {
+  props: Fit[];
 }
 
-const profiles: Profile[] = [
-  {
-    id: 1,
-    name: "Sarah",
-    age: 28,
-    image: "/test.jpg",
-    tags: ["badge1", "badge2", "badge3", "badge4"],
-    likes: 0,
-  },
-  {
-    id: 2,
-    name: "James",
-    age: 32,
-    image: "/test1.jpg",
-    tags: ["badge1", "badge2", "badge3", "badge4"],
-    likes: 0,
-  },
-  {
-    id: 3,
-    name: "Emma",
-    age: 25,
-    image: "/test2.jpg",
-    tags: ["badge1", "badge2", "badge3", "badge4"],
-    likes: 0,
-  },
-];
-
-export default function SwipeCards() {
+export default function SwipeCards({ props }: SwipeCardsProps) {
+  console.log(props);
   const [currentProfile, setCurrentProfile] = useState(0);
   const [direction, setDirection] = useState<string | null>(null);
-  const [likes, setLikes] = useState(profiles.map((profile) => profile.likes));
+  const [likes, setLikes] = useState(props.map(() => 0));
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -57,16 +30,27 @@ export default function SwipeCards() {
     };
   }, []);
 
+  async function Swipe(direction: string, fitData: Fit) {
+    console.log(props);
+    const formData = new FormData();
+    formData.append("direction", direction);
+    formData.append("fitData", JSON.stringify(fitData));
+
+    const response = await swiped(formData);
+    console.log(response);
+  }
+
   const handleDragEnd = (
     event: MouseEvent | TouchEvent | PointerEvent,
     info: PanInfo
   ) => {
     const swipeThreshold = 100;
     if (Math.abs(info.offset.x) > swipeThreshold) {
-      const direction = info.offset.x > 0 ? "right" : "left";
-      setDirection(direction);
+      const newDirection = info.offset.x > 0 ? "right" : "left";
+      setDirection(newDirection);
+      Swipe(newDirection, props[currentProfile]);
       setTimeout(() => {
-        setCurrentProfile((prev) => (prev + 1) % profiles.length);
+        setCurrentProfile((prev) => (prev + 1) % props.length);
         setDirection(null);
       }, 200);
     }
@@ -84,9 +68,9 @@ export default function SwipeCards() {
     <div className="flex flex-col items-center gap-6 p-4 overflow-hidden touch-action-none min-h-[calc(100vh-2rem)]">
       <div className="relative h-[400px] w-[300px]">
         <AnimatePresence>
-          {currentProfile < profiles.length && (
+          {currentProfile < props.length && (
             <motion.div
-              key={profiles[currentProfile].id}
+              key={props[currentProfile].id}
               initial={{ scale: 1 }}
               animate={{
                 scale: 1,
@@ -105,10 +89,11 @@ export default function SwipeCards() {
             >
               <Card className="h-full w-[300px]">
                 <CardContent className="p-0">
-                  <img
-                    src={profiles[currentProfile].image || "/placeholder.svg"}
-                    alt={profiles[currentProfile].name}
-                    className="h-full w-full object-cover"
+                  <Image
+                    src={props[currentProfile].image || "/placeholder.svg"}
+                    alt={`Fit Image ${currentProfile + 1}`}
+                    width={300}
+                    height={300}
                   />
                   <div className="p-2 bg-primary flex justify-between items-center">
                     <div className="flex items-center gap-4">
@@ -117,23 +102,21 @@ export default function SwipeCards() {
                         <AvatarFallback>CN</AvatarFallback>
                       </Avatar>
                       <div>
-                        <TypographyH3>
-                          {profiles[currentProfile].name}
-                        </TypographyH3>
+                        <TypographyH3>Fit #{currentProfile + 1}</TypographyH3>
                         <TypographyP>
-                          {profiles[currentProfile].age} years old
+                          {props[currentProfile].description}
                         </TypographyP>
                       </div>
                     </div>
                     <div className="flex flex-col items-center">
-                      <button onClick={handleLike} className="text-red-500">
+                      <Button onClick={handleLike} variant="secondary">
                         <Heart className="w-8 h-8" />
-                      </button>
+                      </Button>
                       <TypographyP>{likes[currentProfile]} Likes</TypographyP>
                     </div>
                   </div>
                   <div className="p-4 flex flex-wrap gap-2">
-                    {profiles[currentProfile].tags.map((tag, index) => (
+                    {props[currentProfile].tags.map((tag, index) => (
                       <Badge
                         key={index}
                         variant="secondary"
