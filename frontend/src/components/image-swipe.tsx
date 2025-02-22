@@ -5,12 +5,18 @@ import { motion, AnimatePresence, type PanInfo } from "framer-motion";
 import { Heart, X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { TypographyH3 } from "./typography/H3";
+import { TypographyP } from "./typography/P";
+import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Badge } from "./ui/badge";
 
 interface Profile {
   id: number;
   name: string;
   age: number;
   image: string;
+  tags: string[];
+  likes: number;
 }
 
 const profiles: Profile[] = [
@@ -18,31 +24,32 @@ const profiles: Profile[] = [
     id: 1,
     name: "Sarah",
     age: 28,
-    image: "/placeholder.svg?height=400&width=300",
+    image: "/test.jpg",
+    tags: ["badge1", "badge2", "badge3", "badge4"],
+    likes: 0,
   },
   {
     id: 2,
     name: "James",
     age: 32,
-    image: "/placeholder.svg?height=400&width=300",
+    image: "/test1.jpg",
+    tags: ["badge1", "badge2", "badge3", "badge4"],
+    likes: 0,
   },
   {
     id: 3,
     name: "Emma",
     age: 25,
-    image: "/placeholder.svg?height=400&width=300",
-  },
-  {
-    id: 4,
-    name: "Michael",
-    age: 30,
-    image: "/placeholder.svg?height=400&width=300",
+    image: "/test2.jpg",
+    tags: ["badge1", "badge2", "badge3", "badge4"],
+    likes: 0,
   },
 ];
 
 export default function SwipeCards() {
   const [currentProfile, setCurrentProfile] = useState(0);
   const [direction, setDirection] = useState<string | null>(null);
+  const [likes, setLikes] = useState(profiles.map((profile) => profile.likes));
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -66,12 +73,12 @@ export default function SwipeCards() {
     }
   };
 
-  const handleButtonClick = (direction: "left" | "right") => {
-    setDirection(direction);
-    setTimeout(() => {
-      setCurrentProfile((prev) => (prev + 1) % profiles.length);
-      setDirection(null);
-    }, 200);
+  const handleLike = () => {
+    setLikes((prevLikes) =>
+      prevLikes.map((like, index) =>
+        index === currentProfile ? like + 1 : like
+      )
+    );
   };
 
   return (
@@ -97,43 +104,53 @@ export default function SwipeCards() {
               onDragEnd={handleDragEnd}
               className="absolute cursor-grab active:cursor-grabbing touch-none"
             >
-              <Card className="h-[400px] w-[300px]">
+              <Card className="h-full w-[300px]">
                 <CardContent className="p-0">
                   <img
                     src={profiles[currentProfile].image || "/placeholder.svg"}
                     alt={profiles[currentProfile].name}
-                    className="h-[300px] w-full object-cover"
+                    className="h-full w-full object-cover"
                   />
-                  <div className="p-4">
-                    <h2 className="text-2xl font-semibold">
-                      {profiles[currentProfile].name},{" "}
-                      {profiles[currentProfile].age}
-                    </h2>
+                  <div className="p-2 bg-primary flex justify-between items-center">
+                    <div className="flex-col items-center justify-centerli">
+                      <div className="flex items-center gap-4">
+                        <Avatar className="w-12 h-12">
+                          <AvatarImage src="https://github.com/shadcn.png" />
+                          <AvatarFallback>CN</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <TypographyH3>
+                            {profiles[currentProfile].name}
+                          </TypographyH3>
+                        </div>
+                      </div>
+                      <TypographyP>
+                        {profiles[currentProfile].age} years old
+                      </TypographyP>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <button onClick={handleLike}>
+                        <Heart className="w-8 h-8" />
+                      </button>
+                      <TypographyP>{likes[currentProfile]} Likes</TypographyP>
+                    </div>
+                  </div>
+                  <div className="p-4 flex flex-wrap gap-2">
+                    {profiles[currentProfile].tags.map((tag, index) => (
+                      <Badge
+                        key={index}
+                        variant="outline"
+                        className="rounded-full px-3 py-1"
+                      >
+                        {tag}
+                      </Badge>
+                    ))}
                   </div>
                 </CardContent>
               </Card>
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
-
-      <div className="flex gap-4">
-        <Button
-          size="icon"
-          variant="outline"
-          className="h-14 w-14 rounded-full"
-          onClick={() => handleButtonClick("left")}
-        >
-          <X className="h-6 w-6" />
-        </Button>
-        <Button
-          size="icon"
-          variant="outline"
-          className="h-14 w-14 rounded-full"
-          onClick={() => handleButtonClick("right")}
-        >
-          <Heart className="h-6 w-6" />
-        </Button>
       </div>
     </div>
   );
