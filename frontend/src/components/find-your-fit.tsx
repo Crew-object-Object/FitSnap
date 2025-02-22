@@ -24,9 +24,7 @@ export default function FindYourFit({ id }: { id?: string }) {
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
   const [result, setResult] = useState<{ image?: string; size?: string }>(
-    id
-      ? { image: "/placeholder.svg?height=300&width=300", size: "M" }
-      : undefined
+    id ? { image: "/placeholder.svg?height=300&width=300", size: "M" } : {}
   );
 
   const handleProceed = async () => {

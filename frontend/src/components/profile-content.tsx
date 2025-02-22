@@ -2,7 +2,6 @@ import Image from "next/image";
 import prisma from "@/lib/prisma";
 import { Card } from "@/components/ui/card";
 import { ChevronRight } from "lucide-react";
-import { useSession } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
