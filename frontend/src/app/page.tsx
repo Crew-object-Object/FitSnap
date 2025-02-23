@@ -11,8 +11,19 @@ import {
 import { TypographyH1 } from "@/components/typography/H1";
 import { TypographyH2 } from "@/components/typography/H2";
 import Link from "next/link";
+import { useState, useEffect } from "react";
 
 export default function Home() {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const slides = [1, 2, 3];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
+    }, 3000); // Change slide every 3 seconds
+
+    return () => clearInterval(interval);
+  }, []);
   return (
     <main className="flex min-h-screen flex-col items-center p-4 overflow-hidden">
       <div className="relative w-full">
@@ -47,17 +58,22 @@ export default function Home() {
             <CarouselContent>
               {[1, 2, 3].map((_, index) => (
                 <CarouselItem key={index}>
-                  <div className="p-1">
-                    <div className="flex aspect-[9/16] items-center justify-center rounded-xl bg-primary/10 relative overflow-hidden">
-                      <img
-                        src={`/placeholder.svg?height=640&width=360&text=App Screenshot ${
-                          index + 1
-                        }`}
-                        alt={`App Screenshot ${index + 1}`}
-                        className="object-cover w-full h-full"
-                      />
-                    </div>
-                  </div>
+                  {slides.map((_, index) => (
+                    <CarouselItem
+                      key={index}
+                      className={currentIndex === index ? "block" : "hidden"}
+                    >
+                      <div className="p-1">
+                        <div className="flex aspect-[9/16] items-center justify-center rounded-xl bg-primary/10 relative overflow-hidden">
+                          <img
+                            src={`/app${index + 1}.jpg`}
+                            alt={`App Screenshot ${index + 1}`}
+                            className="object-cover w-full h-full"
+                          />
+                        </div>
+                      </div>
+                    </CarouselItem>
+                  ))}
                 </CarouselItem>
               ))}
             </CarouselContent>
