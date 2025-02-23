@@ -3,15 +3,11 @@
 import Image from "next/image";
 import { motion } from "framer-motion";
 
-export default function Result({
-  result,
-}: {
-  result: { image?: string; size?: string };
-}) {
+export default function Result({ result }: { result: string[] }) {
   return (
     <div className="text-center">
       <h2 className="text-2xl font-bold mb-6">Your Fit Result</h2>
-      {result.image && (
+      {result.result_url && (
         <div className="mb-6">
           <Image
             width={300}
@@ -19,18 +15,18 @@ export default function Result({
             height={300}
             alt="Fit result"
             className="mx-auto rounded-lg"
-            src={result.image || "/placeholder.svg"}
+            src={result.result_url || "/placeholder.svg"}
           />
         </div>
       )}
-      {result.size && (
+      {result.length > 0 && (
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           className="text-6xl font-bold text-primary"
           transition={{ type: "spring", stiffness: 260, damping: 20 }}
         >
-          {result.size}
+          {result.map((element) => element)}
         </motion.div>
       )}
       <p className="mt-4 text-lg">

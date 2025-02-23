@@ -1,13 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { SetStateAction, useState } from "react";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
 
 const emojis = ["😂", "🙂", "🥰", "🤩", "🤐", "🔥"];
 
-export function DockDemo({ id }: { id: string }) {
-  const router = useRouter();
+export function DockDemo({ id, setCurrentProfile, propsLength }: { id: string, setCurrentProfile: (value: SetStateAction<number>) => void, propsLength: number }) {
   const [bursts, setBursts] = useState<
     { id: number; emoji: string; x: number }[]
   >([]);
@@ -20,7 +18,7 @@ export function DockDemo({ id }: { id: string }) {
     };
     setBursts((prev) => [...prev, newBurst]);
 
-    router.push(`/find-your-fit/${id}`);
+    setCurrentProfile((prev: number) => (prev + 1) % propsLength);
     setTimeout(() => {
       setBursts((prev) => prev.filter((b) => b.id !== newBurst.id));
     }, 1000);
