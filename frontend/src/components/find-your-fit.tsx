@@ -27,13 +27,7 @@ interface CameraProps {
   videoRef: React.RefObject<HTMLVideoElement>;
 }
 
-export default function FindYourFit({
-  id,
-  fitData,
-}: {
-  id?: string;
-  fitData: Fit | null;
-}) {
+export default function FindYourFit({ fitData }: { fitData?: Fit | null }) {
   const [step, setStep] = useState<"input" | "loading" | "result">("input");
   const [cameraFacing, setCameraFacing] = useState<"user" | "environment">(
     "user"
