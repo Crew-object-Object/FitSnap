@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { DetectionAction } from "@/actions/detection";
 import { motion, AnimatePresence } from "framer-motion";
+import { Fit } from "@prisma/client";
 
 interface DetectionResult {
   predicted_size: string[];
@@ -26,7 +27,13 @@ interface CameraProps {
   videoRef: React.RefObject<HTMLVideoElement>;
 }
 
-export default function FindYourFit({ id }: { id?: string }) {
+export default function FindYourFit({
+  id,
+  fitData,
+}: {
+  id?: string;
+  fitData: Fit | null;
+}) {
   const [step, setStep] = useState<"input" | "loading" | "result">("input");
   const [cameraFacing, setCameraFacing] = useState<"user" | "environment">(
     "user"
@@ -67,21 +74,15 @@ export default function FindYourFit({ id }: { id?: string }) {
     weight: string,
     screenshotFile: File
   ): Promise<DetectionResult> {
-    const fitData = await prisma.fit.findFirst({
-      where: { id },
-    });
-
-    console.log(fitData)
-
     const formData = new FormData();
     formData.append("age", age);
     formData.append("height", height);
     formData.append("weight", weight);
-    const fileUrl = fitData?.image || "";
-    formData.append("imageUrl", fileUrl);
+    const file_url = fitData?.image || "";
+    formData.append("file_url", file_url);
+    formData.append("fileImage", screenshotFile);
 
     const result = await DetectionAction(formData);
-    console.log(23, result);
     return result;
   }
 
@@ -89,8 +90,8 @@ export default function FindYourFit({ id }: { id?: string }) {
     setStep("loading");
     const result = await DetectionActionCall(
       age,
-      weight,
       height,
+      weight,
       screenshotFile
     );
     setResult(result);

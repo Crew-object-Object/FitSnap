@@ -7,7 +7,7 @@ export default function Result({ result }: { result: string[] }) {
   return (
     <div className="text-center">
       <h2 className="text-2xl font-bold mb-6">Your Fit Result</h2>
-      {/* {result.image && (
+      {result.result_url && (
         <div className="mb-6">
           <Image
             width={300}
@@ -15,10 +15,10 @@ export default function Result({ result }: { result: string[] }) {
             height={300}
             alt="Fit result"
             className="mx-auto rounded-lg"
-            src={result.image || "/placeholder.svg"}
+            src={result.result_url || "/placeholder.svg"}
           />
         </div>
-      )} */}
+      )}
       {result.length > 0 && (
         <motion.div
           initial={{ scale: 0 }}
