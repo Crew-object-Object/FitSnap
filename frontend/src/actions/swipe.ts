@@ -1,10 +1,13 @@
 "use server";
 
+import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { SwipeType } from "@prisma/client"; 
+import { SwipeType } from "@prisma/client";
+import { headers } from "next/headers";
 
 export async function swiped(formData: FormData) {
   try {
+    const session = await auth.api.getSession({ headers: await headers() })
     const direction = formData.get("direction");
     const fit = formData.get("fitData");
 
@@ -20,7 +23,7 @@ export async function swiped(formData: FormData) {
 
     await prisma.swipe.create({
       data: {
-        userId: fitData.userId,
+        userId: session!.user.id,
         fitId: fitData.id,
         swipeType,
       },
