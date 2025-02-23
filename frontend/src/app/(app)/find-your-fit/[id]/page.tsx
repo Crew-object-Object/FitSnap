@@ -15,7 +15,7 @@ export default async function Page({
   return (
     <main className="container mx-auto p-4">
       <Suspense fallback={<div>Loading...</div>}>
-        <FindYourFit id={id} fitData={fitData} />
+        <FindYourFit fitData={fitData} />
       </Suspense>
     </main>
   );

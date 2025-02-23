@@ -1,14 +1,22 @@
 "use server";
 
-import { UTApi, UTFile } from "uploadthing/server";
+import { UTApi } from "uploadthing/server";
 
-interface Result {
+interface Result1 {
   predicted_size: string[];
+}
+
+interface Result2 {
+  pants_fit: string;
+  shirt_fit: string;
+  pants_size: string;
+  result_url: string;
+  shirt_size: string;
 }
 
 const utapi = new UTApi();
 
-export async function DetectionAction(formData: FormData): Promise<Result> {
+export async function DetectionAction(formData: FormData): Promise<{Result1,Result2}> {
   const age = formData.get("age");
   const height = formData.get("height");
   const weight = formData.get("weight");
@@ -54,8 +62,7 @@ export async function DetectionAction(formData: FormData): Promise<Result> {
     }
   );
 
-  console.log(await response2.json());
-
-  const data: Result = await response1.json();
-  return data;
+  const data1: Result1 = await response1.json();
+  const data2: Result2 = await response2.json();
+  return { data1, data2 };
 }
