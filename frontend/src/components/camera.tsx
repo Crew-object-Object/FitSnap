@@ -2,9 +2,12 @@
 
 import { useRef, useEffect } from "react";
 
-export default function Camera({ facing }: { facing: "user" | "environment" }) {
-  const videoRef = useRef<HTMLVideoElement>(null);
+type CameraProps = {
+  facing: "user" | "environment";
+  videoRef: React.RefObject<HTMLVideoElement | null>;
+};
 
+export default function Camera({ facing, videoRef }: CameraProps) {
   useEffect(() => {
     let stream: MediaStream | null = null;
 

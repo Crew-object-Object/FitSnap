@@ -9,16 +9,25 @@ import {
 } from "@/components/ui/select";
 import Camera from "./camera";
 import Result from "./result";
+import prisma from "@/lib/prisma";
 import { useRef, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { motion, AnimatePresence } from "framer-motion";
 import { DetectionAction } from "@/actions/detection";
-import prisma from "@/lib/prisma";
+import { motion, AnimatePresence } from "framer-motion";
+
+interface DetectionResult {
+  predicted_size: string[];
+}
+
+interface CameraProps {
+  facing: "user" | "environment";
+  videoRef: React.RefObject<HTMLVideoElement>;
+}
 
 export default function FindYourFit({ id }: { id?: string }) {
-  const [step, setStep] = useState("input");
+  const [step, setStep] = useState<"input" | "loading" | "result">("input");
   const [cameraFacing, setCameraFacing] = useState<"user" | "environment">(
     "user"
   );
@@ -26,7 +35,10 @@ export default function FindYourFit({ id }: { id?: string }) {
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
   const [file, setFile] = useState<File | null>(null);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [result, setResult] = useState<DetectionResult>({
+    predicted_size: [""],
+  });
 
   const captureScreenshot = () => {
     if (videoRef.current) {
@@ -50,35 +62,38 @@ export default function FindYourFit({ id }: { id?: string }) {
   };
 
   async function DetectionActionCall(
-    height: string,
     age: string,
-    weight: string
-  ) {
+    height: string,
+    weight: string,
+    screenshotFile: File
+  ): Promise<DetectionResult> {
     const fitData = await prisma.fit.findFirst({
-      where: {
-        id: id,
-      },
+      where: { id },
     });
 
-    const fileUrl = fitData?.image;
-    const formData = new FormData();
-    formData.append("height", height);
-    formData.append("age", age);
-    formData.append("weight", weight);
-    formData.append("imageUrl", fileUrl!);
+    console.log(fitData)
 
-    const response = await DetectionAction(formData);
+    const formData = new FormData();
+    formData.append("age", age);
+    formData.append("height", height);
+    formData.append("weight", weight);
+    const fileUrl = fitData?.image || "";
+    formData.append("imageUrl", fileUrl);
+
+    const result = await DetectionAction(formData);
+    console.log(23, result);
+    return result;
   }
 
   const handleProceed = async (screenshotFile: File) => {
     setStep("loading");
-    const formData = new FormData();
-    formData.append("height", height);
-    formData.append("weight", weight);
-    formData.append("age", age);
-    formData.append("file", screenshotFile);
-
-    await DetectionActionCall(height, weight, age);
+    const result = await DetectionActionCall(
+      age,
+      weight,
+      height,
+      screenshotFile
+    );
+    setResult(result);
     setStep("result");
   };
 
@@ -90,10 +105,10 @@ export default function FindYourFit({ id }: { id?: string }) {
         {step === "input" && (
           <motion.div
             key="input"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
+            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: 20 }}
           >
             <h1 className="text-2xl font-bold mb-6">Find Your Fit</h1>
             <Camera facing={cameraFacing} videoRef={videoRef} />
@@ -170,7 +185,7 @@ export default function FindYourFit({ id }: { id?: string }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
-            <Result result={result} />
+            <Result result={result.predicted_size} />
           </motion.div>
         )}
       </AnimatePresence>
