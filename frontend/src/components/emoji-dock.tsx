@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { SetStateAction, useState } from "react";
 import { motion } from "framer-motion";
 import { swiped } from "@/actions/swipe";

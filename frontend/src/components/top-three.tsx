@@ -14,8 +14,8 @@ export function TopThree({
   }[];
 }) {
   return (
-    <div className="relative">
-      <div className="flex justify-center items-end gap-4 h-[300px]">
+    <div className="relative flex flex-col items-center justify-center overflow-hidden">
+      <div className="flex justify-center items-end gap-4 h-[250px]">
         {winners.map((winner) => (
           <div
             key={winner.position}
@@ -59,7 +59,7 @@ export function TopThree({
                   {winner.points} points
                 </p>
               </div>
-              <div className="absolute -bottom-8 text-4xl font-bold text-primary">
+              <div className="absolute -bottom-4 text-4xl font-bold text-primary">
                 #{winner.position}
               </div>
             </Card>
