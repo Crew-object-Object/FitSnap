@@ -2,31 +2,17 @@ import { Trophy } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-export function TopThree() {
-  const winners = [
-    {
-      position: 2,
-      name: "Sarah Silver",
-      points: "2,890",
-      avatar: "/placeholder.svg",
-      color: "bg-gray-300", // Silver
-    },
-    {
-      position: 1,
-      name: "Golden Grace",
-      points: "3,450",
-      avatar: "/placeholder.svg",
-      color: "bg-yellow-400", // Gold
-    },
-    {
-      position: 3,
-      name: "Bronze Beauty",
-      points: "2,340",
-      avatar: "/placeholder.svg",
-      color: "bg-amber-700", // Bronze
-    },
-  ];
-
+export function TopThree({
+  winners,
+}: {
+  winners: {
+    position: number;
+    name: string;
+    points: string;
+    avatar: string;
+    color: string;
+  }[];
+}) {
   return (
     <div className="relative">
       <div className="flex justify-center items-end gap-4 h-[300px]">
