@@ -72,6 +72,8 @@ export async function DetectionAction(
       }
     );
 
+    console.log(await response2.json());
+
     if (!response2.ok) {
       throw new Error(
         `Failed to fetch fit prediction: ${response2.statusText}`
