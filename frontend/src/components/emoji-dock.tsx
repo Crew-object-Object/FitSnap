@@ -2,10 +2,19 @@
 
 import { SetStateAction, useState } from "react";
 import { motion } from "framer-motion";
+import { swiped } from "@/actions/swipe";
 
 const emojis = ["😂", "🙂", "🥰", "🤩", "🤐", "🔥"];
 
-export function DockDemo({ id, setCurrentProfile, propsLength }: { id: string, setCurrentProfile: (value: SetStateAction<number>) => void, propsLength: number }) {
+export function DockDemo({
+  id,
+  setCurrentProfile,
+  propsLength,
+}: {
+  id: string;
+  setCurrentProfile: (value: SetStateAction<number>) => void;
+  propsLength: number;
+}) {
   const [bursts, setBursts] = useState<
     { id: number; emoji: string; x: number }[]
   >([]);
@@ -17,6 +26,11 @@ export function DockDemo({ id, setCurrentProfile, propsLength }: { id: string, s
       x: Math.random() * 200 - 100,
     };
     setBursts((prev) => [...prev, newBurst]);
+
+    const formData = new FormData();
+    formData.append("direction", "right");
+    formData.append("fitData", `{ "id": "${id}" }`);
+    swiped(formData);
 
     setCurrentProfile((prev: number) => (prev + 1) % propsLength);
     setTimeout(() => {

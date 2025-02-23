@@ -161,7 +161,11 @@ export default function SwipeCards({ props }: SwipeCardsProps) {
         </AnimatePresence>
       </div>
       <div className="mt-auto w-full flex justify-center pb-6">
-        <DockDemo setCurrentProfile={setCurrentProfile} propsLength={props.length} id={props[currentProfile].id} />
+        <DockDemo
+          setCurrentProfile={setCurrentProfile}
+          propsLength={props.length}
+          id={props[currentProfile].id}
+        />
       </div>
     </div>
   );

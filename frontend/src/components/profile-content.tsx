@@ -25,7 +25,7 @@ export async function ProfileContent() {
   const userData = await prisma.user.findUnique({
     where: { id: userId! },
     include: {
-      Swipe: { include: { fit: true } },
+      Swipe: { include: { fit: true }, where: { swipeType: "Like" } },
       fits: { orderBy: { swipes: { _count: "desc" } } },
     },
   });
