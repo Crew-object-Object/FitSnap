@@ -32,7 +32,7 @@ export default function Home() {
           <button className="p-[3px] relative">
             <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-lg" />
             <div className="px-8 py-2 bg-background rounded-[6px] relative group transition duration-200 hover:bg-transparent">
-              <Link href="/sign-in">Try SnapFit Now</Link>
+              <Link href="/sign-in">Try FitSnap Now</Link>
             </div>
           </button>
         </div>
