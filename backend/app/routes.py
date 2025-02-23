@@ -71,6 +71,7 @@ def segment_body_mediapipe(image):
 
 @router.post("/predict-size/")
 async def predict_size(payload: dict):
+    print(payload)
     fit_url = payload.get("fit_url")
     user_url = payload.get("user_url")
     if not user_url:
@@ -108,6 +109,24 @@ async def predict_size(payload: dict):
     mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=image)
     results = detector.detect(mp_image)
     if results.pose_landmarks[0]:
+        # Draw connections between landmarks using Mediapipe's pose connections
+        annotated_image = image.copy()
+        for connection in mp.solutions.pose.POSE_CONNECTIONS:
+            start_idx, end_idx = connection
+            start_landmark = results.pose_landmarks[0][start_idx]
+            end_landmark = results.pose_landmarks[0][end_idx]
+            start_point = (int(start_landmark.x * image.shape[1]), int(start_landmark.y * image.shape[0]))
+            end_point = (int(end_landmark.x * image.shape[1]), int(end_landmark.y * image.shape[0]))
+            cv2.line(annotated_image, start_point, end_point, color=(0, 255, 255), thickness=2)
+        # Draw detected landmarks on the original image
+        for landmark in results.pose_landmarks[0]:
+            x = int(landmark.x * image.shape[1])
+            y = int(landmark.y * image.shape[0])
+            cv2.circle(annotated_image, (x, y), radius=3, color=(0, 255, 0), thickness=-1)
+        # Ensure output directory exists and save the annotated image
+        Path("output").mkdir(exist_ok=True)
+        cv2.imwrite("output/user_mp.png", annotated_image)
+        
         # Get world landmarks for better 3D positioning
         world_landmarks = results.pose_world_landmarks[0]
         # Get shoulder landmarks (landmarks 11 and 12 are left and right shoulders)
@@ -189,8 +208,29 @@ async def predict_size(payload: dict):
     fit_img = cv2.imread(fit_path, cv2.IMREAD_UNCHANGED)
     fit_mp = mp.Image(image_format=mp.ImageFormat.SRGB, data=cv2.cvtColor(fit_img, cv2.COLOR_BGRA2RGB))
     fit_results = detector.detect(fit_mp)
+    if fit_results.pose_landmarks and fit_results.pose_landmarks[0]:
+        fit_img = cv2.imread(fit_path, cv2.IMREAD_COLOR)
+        if fit_img is None:
+            raise ValueError("Fit image not found at the provided path.")
+        for connection in mp.solutions.pose.POSE_CONNECTIONS:
+            try:
+                start_idx, end_idx = connection
+                start_landmark = fit_results.pose_landmarks[0][start_idx]
+                end_landmark = fit_results.pose_landmarks[0][end_idx]
+                start_point = (int(start_landmark.x * fit_img.shape[1]), int(start_landmark.y * fit_img.shape[0]))
+                end_point = (int(end_landmark.x * fit_img.shape[1]), int(end_landmark.y * fit_img.shape[0]))
+                cv2.line(fit_img, start_point, end_point, color=(0, 255, 255), thickness=2)
+            except Exception:
+                continue
+        for landmark in fit_results.pose_landmarks[0]:
+            x_coord = int(landmark.x * fit_img.shape[1])
+            y_coord = int(landmark.y * fit_img.shape[0])
+            cv2.circle(fit_img, (x_coord, y_coord), radius=3, color=(0, 255, 0), thickness=-1)
+        cv2.imwrite("output/fit_mp.png", fit_img)
+    
     # Get original image landmarks again
     original_results = detector.detect(mp_image)
+    
     if (fit_results.pose_landmarks and fit_results.pose_landmarks[0] and 
         original_results.pose_landmarks and original_results.pose_landmarks[0] and 
         len(original_results.pose_landmarks[0]) > 12 and len(fit_results.pose_landmarks[0]) > 12):
