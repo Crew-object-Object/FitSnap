@@ -63,7 +63,7 @@ export async function DetectionAction(
       {
         method: "POST",
         body: JSON.stringify({
-          fit_url,
+          fit_url: fit_url,
           user_url: url[0].data.ufsUrl,
         }),
         headers: {
@@ -71,8 +71,6 @@ export async function DetectionAction(
         },
       }
     );
-
-    console.log(await response2.json());
 
     if (!response2.ok) {
       throw new Error(

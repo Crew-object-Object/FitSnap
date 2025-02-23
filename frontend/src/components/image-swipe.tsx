@@ -164,7 +164,7 @@ export default function SwipeCards({ props }: SwipeCardsProps) {
         <DockDemo
           setCurrentProfile={setCurrentProfile}
           propsLength={props.length}
-          id={props[currentProfile].id}
+          id={props[currentProfile]!.id}
         />
       </div>
     </div>

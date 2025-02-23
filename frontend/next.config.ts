@@ -8,15 +8,11 @@ const withSerwist = withSerwistInit({
 
 const nextConfig: NextConfig = {
   images: {
-    domains: [
-      "h6q45r0c51.ufs.sh",
-      "changing-party-identify-nano.trycloudflare.com",
-    ],
     remotePatterns: [
       {
         protocol: "https",
         hostname: "utfs.io",
-        pathname: "/**",
+        pathname: "/a/**",
       },
       {
         protocol: "https",
@@ -30,8 +26,8 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "changing-party-identify-nano.trycloudflare.com",
-        pathname: "/public/images/**",
+        hostname: "taxation-keno-accessories-poem.trycloudflare.com",
+        pathname: "/**",
       },
     ],
   },

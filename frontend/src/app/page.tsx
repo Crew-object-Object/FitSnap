@@ -13,6 +13,7 @@ import { useState, useEffect } from "react";
 import { Camera, Shirt, Ruler } from "lucide-react";
 import { TypographyH1 } from "@/components/typography/H1";
 import { TypographyH2 } from "@/components/typography/H2";
+import Image from "next/image";
 
 export default function Home() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -21,10 +22,10 @@ export default function Home() {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % slides.length);
-    }, 3000); // Change slide every 3 seconds
+    }, 3000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [slides.length]);
   return (
     <main className="flex min-h-screen flex-col items-center p-4 overflow-hidden">
       <div className="relative w-full">
@@ -66,7 +67,10 @@ export default function Home() {
                     >
                       <div className="p-1">
                         <div className="flex aspect-[9/16] items-center justify-center rounded-xl bg-primary/10 relative overflow-hidden">
-                          <img
+                          <Image
+                            width={100}
+                            unoptimized
+                            height={100}
                             src={`/app${index + 1}.jpg`}
                             alt={`App Screenshot ${index + 1}`}
                             className="object-cover w-full h-full"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useEffect } from "react";
 
 type CameraProps = {
   facing: "user" | "environment";
@@ -31,7 +31,7 @@ export default function Camera({ facing, videoRef }: CameraProps) {
         stream.getTracks().forEach((track) => track.stop());
       }
     };
-  }, [facing]);
+  }, [facing, videoRef]);
 
   return (
     <div className="relative w-full h-64 bg-gray-200 rounded-lg overflow-hidden">
