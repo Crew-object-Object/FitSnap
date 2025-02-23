@@ -1,9 +1,7 @@
-import io
-from fastapi import APIRouter, UploadFile, File
+from fastapi import APIRouter
 import cv2
 import numpy as np
 from joblib import load
-from fastapi import Form
 import pandas as pd
 from pathlib import Path
 import mediapipe as mp
