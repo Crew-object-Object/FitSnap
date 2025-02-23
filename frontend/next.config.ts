@@ -8,28 +8,30 @@ const withSerwist = withSerwistInit({
 
 const nextConfig: NextConfig = {
   images: {
-    domains: ["h6q45r0c51.ufs.sh"],
+    domains: [
+      "h6q45r0c51.ufs.sh",
+      "changing-party-identify-nano.trycloudflare.com",
+    ],
     remotePatterns: [
       {
         protocol: "https",
         hostname: "utfs.io",
-        port: "",
         pathname: "/f/**",
-        search: "",
       },
       {
         protocol: "https",
         hostname: "h6q45r0c51.ufs.sh",
-        port: "",
-        pathname: "/",
-        search: "",
+        pathname: "/**",
       },
       {
         protocol: "https",
         hostname: "lh3.googleusercontent.com",
-        port: "",
         pathname: "/a/**",
-        search: "",
+      },
+      {
+        protocol: "https",
+        hostname: "changing-party-identify-nano.trycloudflare.com",
+        pathname: "/public/images/**",
       },
     ],
   },
@@ -44,4 +46,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSerwist(nextConfig);

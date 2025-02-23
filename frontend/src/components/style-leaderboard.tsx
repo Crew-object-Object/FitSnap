@@ -48,34 +48,39 @@ export function StyleLeaderboard({ category }: StyleLeaderboardProps) {
   ];
 
   return (
-    <div className="py-6">
-      <h2 className="text-2xl font-semibold mb-6">Top {category} Models</h2>
-      <div className="space-y-4">
+    <div className="py-4">
+      <h2 className="text-xl font-semibold mb-4">Top {category} Models</h2>
+      <div className="space-y-3">
         {models.map((model, index) => (
-          <Card key={model.name} className="p-4">
-            <div className="flex items-center gap-4">
-              <div className="font-bold text-lg w-8">{index + 1}</div>
-              <Avatar className="w-12 h-12 border-2 border-primary">
+          <Card key={model.name} className="p-3">
+            <div className="flex items-center gap-2">
+              <div className="font-bold text-base w-6">{index + 1}</div>
+              <Avatar className="w-10 h-10 border-2 border-primary">
                 <AvatarImage src={model.avatar} />
                 <AvatarFallback>{model.name[0]}</AvatarFallback>
               </Avatar>
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-semibold">{model.name}</h3>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1 flex-wrap">
+                  <h3 className="font-semibold text-sm truncate">
+                    {model.name}
+                  </h3>
                   {model.trending && (
-                    <Badge variant="secondary" className="gap-1">
+                    <Badge
+                      variant="secondary"
+                      className="gap-1 text-xs py-0 h-5"
+                    >
                       <Flame className="w-3 h-3" /> Trending
                     </Badge>
                   )}
                 </div>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-xs text-muted-foreground">
                   {model.points} points
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="gap-1">
+              <div className="flex items-center">
+                <Badge variant="outline" className="gap-1 text-xs py-0 h-5">
                   <Crown className="w-3 h-3" />
-                  {model.streak} day streak
+                  {model.streak}d
                 </Badge>
               </div>
             </div>

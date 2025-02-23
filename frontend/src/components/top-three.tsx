@@ -29,7 +29,7 @@ export function TopThree() {
 
   return (
     <div className="relative">
-      <div className="flex justify-center items-end gap-4 h-[400px]">
+      <div className="flex justify-center items-end gap-4 h-[300px]">
         {winners.map((winner) => (
           <div
             key={winner.position}
