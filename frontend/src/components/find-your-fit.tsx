@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/select";
 import Camera from "./camera";
 import Result from "./result";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -25,10 +25,29 @@ export default function FindYourFit({ id }: { id?: string }) {
   const [age, setAge] = useState("");
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
-  const [result, setResult] = useState<{ image?: string; size?: string }>(
-    id ? { image: "/placeholder.svg?height=300&width=300", size: "M" } : {}
-  );
   const [file, setFile] = useState<File | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  const captureScreenshot = () => {
+    if (videoRef.current) {
+      const canvas = document.createElement("canvas");
+      canvas.width = videoRef.current.videoWidth;
+      canvas.height = videoRef.current.videoHeight;
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const screenshotFile = new File([blob], "screenshot.png", {
+              type: "image/png",
+            });
+            setFile(screenshotFile);
+            handleProceed(screenshotFile);
+          }
+        }, "image/png");
+      }
+    }
+  };
 
   async function DetectionActionCall(
     height: string,
@@ -47,16 +66,20 @@ export default function FindYourFit({ id }: { id?: string }) {
     formData.append("age", age);
     formData.append("weight", weight);
     formData.append("imageUrl", fileUrl!);
-    formData.append("file", JSON.stringify(file));
 
-    console.log(file);
     const response = await DetectionAction(formData);
   }
-  const handleProceed = async () => {
+
+  const handleProceed = async (screenshotFile: File) => {
     setStep("loading");
-    setResult({ image: "/placeholder.svg?height=300&width=300", size: "M" });
+    const formData = new FormData();
+    formData.append("height", height);
+    formData.append("weight", weight);
+    formData.append("age", age);
+    formData.append("file", screenshotFile);
+
+    await DetectionActionCall(height, weight, age);
     setStep("result");
-    await DetectionActionCall(height, age, weight);
   };
 
   const isFormValid = height && weight && age;
@@ -73,7 +96,7 @@ export default function FindYourFit({ id }: { id?: string }) {
             transition={{ duration: 0.3 }}
           >
             <h1 className="text-2xl font-bold mb-6">Find Your Fit</h1>
-            <Camera facing={cameraFacing} />
+            <Camera facing={cameraFacing} videoRef={videoRef} />
             <div className="mt-4 mb-6">
               <Select
                 value={cameraFacing}
@@ -115,18 +138,10 @@ export default function FindYourFit({ id }: { id?: string }) {
                   onChange={(e) => setAge(e.target.value)}
                 />
               </div>
-              <div>
-                <Label htmlFor="file">Upload File</Label>
-                <Input
-                  id="file"
-                  type="file"
-                  onChange={(e) => setFile(e.target.files?.[0] || null)}
-                />
-              </div>
               <Button
                 onClick={(e) => {
                   e.preventDefault();
-                  handleProceed();
+                  captureScreenshot();
                 }}
                 disabled={!isFormValid}
               >
