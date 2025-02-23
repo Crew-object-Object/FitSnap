@@ -4,10 +4,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function LeaderboardPage() {
   return (
-    <div className="container mx-auto px-4 py-10 space-y-10">
-      <h1 className="text-4xl font-bold text-center mb-12">Style Leaders</h1>
+    <div className="container mx-auto px-4 overflow-hidden">
+      <h1 className="text-4xl font-bold text-center">Leaderboard</h1>
 
-      {/* Top 3 Overall */}
       <TopThree />
 
       {/* Style Categories */}
