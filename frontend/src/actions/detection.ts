@@ -16,7 +16,9 @@ interface Result2 {
 
 const utapi = new UTApi();
 
-export async function DetectionAction(formData: FormData): Promise<{Result1,Result2}> {
+export async function DetectionAction(
+  formData: FormData
+): Promise<{ result1: Result1; result2?: Result2 }> {
   const age = formData.get("age");
   const height = formData.get("height");
   const weight = formData.get("weight");
@@ -46,23 +48,38 @@ export async function DetectionAction(formData: FormData): Promise<{Result1,Resu
     throw new Error(`Failed to fetch size prediction: ${response1.statusText}`);
   }
 
-  const url = await utapi.uploadFiles([fileImage as File]);
+  let result2: Result2 | undefined = undefined;
+  const result1: Result1 = await response1.json();
 
-  const response2 = await fetch(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/predict-size`,
-    {
-      method: "POST",
-      body: JSON.stringify({
-        fit_url,
-        user_url: url[0].data?.ufsUrl!,
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
+  if (fit_url) {
+    const url = await utapi.uploadFiles([fileImage as File]);
+
+    if (!url || !url[0]?.data?.ufsUrl) {
+      throw new Error("Failed to upload file");
     }
-  );
 
-  const data1: Result1 = await response1.json();
-  const data2: Result2 = await response2.json();
-  return { data1, data2 };
+    const response2 = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/predict-size`,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          fit_url,
+          user_url: url[0].data.ufsUrl,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (!response2.ok) {
+      throw new Error(
+        `Failed to fetch fit prediction: ${response2.statusText}`
+      );
+    }
+
+    result2 = await response2.json();
+  }
+
+  return { result1, ...(result2 && { result2 }) };
 }
