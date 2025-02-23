@@ -102,7 +102,10 @@ export default function Result({ result }: { result: Result }) {
                     className="relative w-full aspect-square rounded-lg overflow-hidden"
                   >
                     <Image
-                      src={result.result_url || "/placeholder.svg"}
+                      src={
+                        `${process.env.NEXT_PUBLIC_BACKEND_URL}${result.result_url}` ||
+                        "/placeholder.svg"
+                      }
                       alt="Fit visualization"
                       layout="fill"
                       objectFit="cover"
@@ -150,7 +153,7 @@ export default function Result({ result }: { result: Result }) {
                     </div>
                     <Badge variant="secondary">{result.pants_size}</Badge>
                     <p className="text-sm text-muted-foreground">
-                      {result.pants_fit} fit
+                      {result.pants_fit}
                     </p>
                   </motion.div>
                 </div>

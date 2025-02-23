@@ -31,6 +31,13 @@ const nextConfig: NextConfig = {
         pathname: "/a/**",
         search: "",
       },
+      {
+        protocol: "https",
+        hostname: "changing-party-identify-nano.trycloudflare.com",
+        port: "",
+        pathname: "/",
+        search: "",
+      },
     ],
   },
   experimental: {
@@ -44,4 +51,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSerwist(nextConfig);
