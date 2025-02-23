@@ -22,7 +22,13 @@ export async function ProfileContent() {
   const userId = session?.user.id;
   const userRank = data.findIndex((user) => user.id === userId) + 1;
 
-  const userData = await prisma.user.findUnique({ where: { id: userId! }, include: { Swipe: { include: { fit: true } }, fits: { orderBy: { swipes: { _count: 'desc' } } } } })
+  const userData = await prisma.user.findUnique({
+    where: { id: userId! },
+    include: {
+      Swipe: { include: { fit: true } },
+      fits: { orderBy: { swipes: { _count: "desc" } } },
+    },
+  });
 
   return (
     <div className="container mx-auto px-4 pt-20">

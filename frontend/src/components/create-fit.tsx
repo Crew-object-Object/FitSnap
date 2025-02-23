@@ -6,6 +6,7 @@ import {
   CardHeader,
   CardFooter,
   CardContent,
+  CardDescription,
 } from "@/components/ui/card";
 import {
   generatePermittedFileTypes,
@@ -23,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { useDropzone } from "@uploadthing/react";
 import { Textarea } from "@/components/ui/textarea";
 import { useUploadThing } from "@/utils/uploadthing";
+import { redirect } from "next/navigation";
 
 export function CreateFit() {
   const [loading, setLoading] = useState(false);
@@ -31,18 +33,20 @@ export function CreateFit() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [, setUploadStatus] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     const formData = new FormData(e.currentTarget);
     formData.append("image", imageUrl || "");
     formData.append("tags", JSON.stringify(tags));
 
-    toast.promise(createFit(formData), {
+    await toast.promise(createFit(formData), {
       loading: "Creating fit...",
       success: <b>Fit created successfully!</b>,
       error: <b>Failed to create fit. Please try again.</b>,
     });
+
+    redirect("/profile");
   };
 
   const { startUpload, routeConfig } = useUploadThing("imageUploader", {
@@ -51,7 +55,8 @@ export function CreateFit() {
       setImageUrl(fileUrl);
       toast.success("Image Uploaded Successfully");
     },
-    onUploadError: () => {
+    onUploadError: (err) => {
+      console.error(err);
       setUploadStatus("Upload failed");
       setLoading(false);
       toast.success("Failed To Upload Image");
@@ -86,7 +91,8 @@ export function CreateFit() {
     <Card className="max-w-2xl mx-auto">
       <form onSubmit={handleSubmit}>
         <CardHeader>
-          <CardTitle>Create a New Fit</CardTitle>
+          <CardTitle className="text-2xl">Create a New Fit</CardTitle>
+          <CardDescription>Show off your outfits to the world!</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
@@ -112,7 +118,9 @@ export function CreateFit() {
               <>
                 <div {...getRootProps()}>
                   <input {...getInputProps()} />
-                  <Button>Select file</Button>
+                  <Button type="button" variant="secondary" className="w-full">
+                    Select file
+                  </Button>
                 </div>
 
                 {file && (
@@ -124,6 +132,7 @@ export function CreateFit() {
                     <Button
                       onClick={handleUploadFile}
                       disabled={!file || loading}
+                      type="button"
                     >
                       {loading ? "Uploading..." : "Upload"}
                     </Button>
