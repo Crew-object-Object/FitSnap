@@ -6,7 +6,7 @@
     "lint": "next lint",
     "build": "next build",
     "start": "next start",
-    "dev": "next dev --turbopack",
+    "dev": "next dev",
     "postinstall": "npx prisma generate"
   },
   "dependencies": {
