@@ -14,13 +14,13 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       <SidebarProvider>
         <AppSidebar />
         <SwEventsHandler />
-        <main className="p-4 flex flex-col gap-4 w-full max-w-xl mx-auto">
-          <div className="flex items-center h-6 gap-2">
+        <main className="flex flex-col gap-4 w-full max-w-xl mx-auto">
+          <div className="flex items-center px-4 py-1 gap-2 bg-background/75">
             <SidebarTrigger />
             <Separator orientation="vertical" className="h-full mr-2" />
             <LinkBreadcrumbs />
           </div>
-          {children}
+          <div className="p-4">{children}</div>
         </main>
       </SidebarProvider>
       <Toaster />

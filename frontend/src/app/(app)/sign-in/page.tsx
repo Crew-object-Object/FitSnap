@@ -24,7 +24,7 @@ export default function SignIn() {
   const [rememberMe, setRememberMe] = useState(false);
 
   return (
-    <div className="w-full flex justify-center items-center h-px grow">
+    <div className="w-full flex justify-center items-center my-auto">
       <Card className="max-w-md">
         <CardHeader>
           <CardTitle className="text-lg md:text-xl text-black dark:text-white">
