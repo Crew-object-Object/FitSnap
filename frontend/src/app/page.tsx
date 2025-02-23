@@ -1,6 +1,5 @@
 "use client";
-import { Camera, Shirt, Ruler } from "lucide-react";
-import { motion } from "framer-motion";
+
 import {
   Carousel,
   CarouselContent,
@@ -8,10 +7,12 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { Camera, Shirt, Ruler } from "lucide-react";
 import { TypographyH1 } from "@/components/typography/H1";
 import { TypographyH2 } from "@/components/typography/H2";
-import Link from "next/link";
-import { useState, useEffect } from "react";
 
 export default function Home() {
   const [currentIndex, setCurrentIndex] = useState(0);
